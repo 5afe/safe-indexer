@@ -1,5 +1,8 @@
+extern crate celery;
+extern crate celery_codegen;
+
 use celery::prelude::*;
-use async_trait::async_trait;
+use anyhow::Result;
 
 #[celery::task]
 fn add(x: i32, y: i32) -> TaskResult<i32> {
@@ -7,13 +10,17 @@ fn add(x: i32, y: i32) -> TaskResult<i32> {
 }
 
 #[tokio::main]
-async fn main() -> Result<(), Err> {
+async fn main() -> Result<()> {
     let my_app = celery::app!(
-        broker = AMQPBroker { std::env::var("AMQP_URI").unwrap_or_else(|_| "amqp://127.0.0.1:5672/my_vhost".into()) },
+        broker = RedisBroker { std::env::var("REDIS_URI").unwrap_or_else(|_| "redis://127.0.0.1:6379".into()) },
         tasks = [add],
-        task_routes = [],
+        task_routes = [
+            "*" => "celery"
+        ],
     ).await?;
 
-    my_app.consume().await;
+    my_app.display_pretty().await;
+    my_app.consume_from(&["celery"]).await?;
+    my_app.close().await?;
     Ok(())
 }

@@ -8,3 +8,10 @@ edition = "2018"
 
 [dependencies]
 celery = "0.4.0-rc8"
+celery-codegen = "0.4.0-rc8"
+
+serde = "1.0"
+
+tokio = "1.10"
+
+anyhow = "1.0"
