@@ -7,10 +7,7 @@ use celery::prelude::*;
 use anyhow::Result;
 use dotenv::dotenv;
 
-#[celery::task]
-fn add(x: i32, y: i32) -> TaskResult<i32> {
-    Ok(x + y)
-}
+mod tasks;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -19,7 +16,10 @@ async fn main() -> Result<()> {
 
     let my_app = celery::app!(
         broker = RedisBroker { std::env::var("REDIS_URI").unwrap_or_else(|_| "redis://127.0.0.1:6379".into()) },
-        tasks = [add],
+        tasks = [
+            tasks::add::add,
+            tasks::logs::check_incoming_eth
+        ],
         task_routes = [
             "*" => "celery"
         ],
