@@ -6,9 +6,7 @@ extern crate dotenv;
 use celery::prelude::*;
 use anyhow::Result;
 use dotenv::dotenv;
-
-mod config;
-mod tasks;
+use commons::{config, tasks};
 
 #[tokio::main]
 async fn main() -> Result<()> {

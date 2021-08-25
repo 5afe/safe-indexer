@@ -4,7 +4,9 @@ version = "0.1.0"
 authors = ["Jose Alvarez <jp.alvarezl@gmail.com>"]
 edition = "2018"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lib]
+name = "commons"
+path = "src/lib/lib.rs"
 
 [[bin]]
 name = "producer"
@@ -12,7 +14,7 @@ path = "src/producer/main.rs"
 
 [[bin]]
 name = "consumer"
-path = "src/main.rs"
+path = "src/consumer/main.rs"
 
 [dependencies]
 celery = "0.4.0-rc8"
