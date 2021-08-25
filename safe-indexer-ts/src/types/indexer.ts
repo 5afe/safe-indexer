@@ -7,7 +7,7 @@ export interface State {
 
 export interface Loader {
     loadCurrentBlock(): Promise<number>
-    loadEvents(from: number, to: number): Promise<Event[]>
+    loadEvents(from: number, to: number, safe?: string): Promise<Event[]>
 }
 
 export interface Parser {

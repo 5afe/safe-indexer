@@ -11,16 +11,16 @@ const isOlder = (compare: ethers.providers.Log | undefined, base: ethers.provide
     return false // Equal defaults to false
 }
 
-export interface SubLoader {
+export interface EventSource {
     loadEvents(from: number, to: number, address?: string): Promise<ethers.providers.Log[]>
 }
 
 export class EthersLoader implements Loader {
 
     provider: ethers.providers.Provider;
-    subLoaders: SubLoader[];
+    subLoaders: EventSource[];
 
-    constructor(provider: ethers.providers.Provider, subLoaders: SubLoader[]) {
+    constructor(provider: ethers.providers.Provider, subLoaders: EventSource[]) {
         this.provider = provider
         this.subLoaders = subLoaders
     }
@@ -64,8 +64,8 @@ export class EthersLoader implements Loader {
         }
     }
 
-    async loadEvents(from: number, to: number): Promise<Event[]> {
-        const logs = await this.merge(...this.subLoaders.map(l => l.loadEvents(from, to)))
+    async loadEvents(from: number, to: number, safe?: string): Promise<Event[]> {
+        const logs = await this.merge(...this.subLoaders.map(l => l.loadEvents(from, to, safe)))
         return logs.reverse().map(this.toEvent)
     }
 }
