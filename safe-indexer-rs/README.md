@@ -25,7 +25,7 @@ $ cargo watch -x "run --bin consumer"
 To run the `producer` use:
 
 ```bash
-$ cargo run --bin consumer
+$ cargo run --bin producer
 # alternatively, if you are using cargo-watch
-$ cargo watch -x "run --bin consumer"
+$ cargo watch -x "run --bin producer"
 ```
