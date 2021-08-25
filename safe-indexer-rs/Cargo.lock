@@ -1602,6 +1602,22 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "71d301d4193d031abdd79ff7e3dd721168a9572ef3fe51a1517aba235bd8f86e"
 
 [[package]]
+name = "safe-indexer-rs"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "celery",
+ "celery-codegen",
+ "dotenv",
+ "dotenv_codegen",
+ "env_logger",
+ "ethcontract",
+ "log",
+ "serde",
+ "tokio",
+]
+
+[[package]]
 name = "schannel"
 version = "0.1.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1757,22 +1773,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e51e73328dc4ac0c7ccbda3a494dfa03df1de2f46018127f60c693f2648455b0"
 dependencies = [
  "libc",
-]
-
-[[package]]
-name = "simple-indexer-rs"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "celery",
- "celery-codegen",
- "dotenv",
- "dotenv_codegen",
- "env_logger",
- "ethcontract",
- "log",
- "serde",
- "tokio",
 ]
 
 [[package]]

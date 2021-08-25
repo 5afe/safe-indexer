@@ -1,5 +1,5 @@
 [package]
-name = "simple-indexer-rs"
+name = "safe-indexer-rs"
 version = "0.1.0"
 authors = ["Jose Alvarez <jose.alvarez@gnosis.pm>"]
 edition = "2018"
