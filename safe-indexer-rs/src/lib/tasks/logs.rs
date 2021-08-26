@@ -1,8 +1,6 @@
 use crate::config;
 use celery::prelude::*;
-// use ethcontract::futures::join;
-// use ethcontract::futures::stream::StreamExt;
-use ethcontract::{common::DeploymentInformation, log::*, prelude::*};
+use ethcontract::prelude::*;
 
 ethcontract::contract!(
     "abis/GnosisSafeL2.json",
@@ -30,7 +28,7 @@ pub async fn check_incoming_eth(safe_address: String) -> TaskResult<String> {
         .expect("locating deployed contract failed");
 
     // The specific safe I would like to filter by
-    let address: Address = safe_address.parse().expect(&format!(
+    let _address: Address = safe_address.parse().expect(&format!(
         "Couldn't parse safe address from: {}",
         &safe_address
     ));
