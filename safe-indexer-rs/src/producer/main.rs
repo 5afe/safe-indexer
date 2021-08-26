@@ -8,7 +8,7 @@ use tokio::time::Duration;
 // Tasks on the producer side don't need to know the implementation of what the consumer
 // runs, only the method signature. Therefore, methods should be declared but the body
 // can be left as `unimplemented!()
-// Reference: fn add(x: i32, y: i32) -> TaskResult<i32> {
+// Reference: https://github.com/rusty-celery/rusty-celery/blob/41efda696132bff7451b191d185a48129ca1b2e3/examples/beat_app.rs#L13
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -25,7 +25,7 @@ async fn main() -> Result<()> {
             },
             "check_incoming_eth" => {
                 tasks::logs::check_incoming_eth,
-                schedule = DeltaSchedule::new(Duration::from_secs(5)),
+                schedule = DeltaSchedule::new(Duration::from_secs(15)),
                 args = ("0xd6f5Bef6bb4acD235CF85c0ce196316d10785d67".to_string(),),
             }
         ],

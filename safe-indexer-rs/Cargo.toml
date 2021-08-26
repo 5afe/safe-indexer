@@ -32,4 +32,4 @@ log = "0.4"
 dotenv = "0.15.0"
 dotenv_codegen = "0.15.0"
 
-ethcontract = { version = "0.15.1", features = ["default"]}
+ethcontract = "0.15.1"
