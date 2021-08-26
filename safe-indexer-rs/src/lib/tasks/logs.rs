@@ -29,10 +29,25 @@ pub async fn check_incoming_eth(safe_address: String) -> TaskResult<String> {
         .await
         .expect("locating deployed contract failed");
 
+    // The specific safe I would like to filter by
     let address: Address = safe_address.parse().expect(&format!(
         "Couldn't parse safe address from: {}",
         &safe_address
     ));
+
+    let eth_transfer_topic: H256 =
+        "3d0ce9bfc3ed7d6862dbb28b2dea94561fe714a1b4d019aa8af39730d1ad7c3d"
+            .parse()
+            .expect("Topic hash fails");
+    let log = safe_l2
+        .all_events()
+        .from_block(BlockNumber::Earliest)
+        .topic0(Topic::This(eth_transfer_topic))
+        .query()
+        .await
+        .expect("log failed");
+
+    log::error!("{:#?}", log);
     // let filter = LogFilterBuilder::new(web3)
     //     .from_block(BlockNumber::Earliest)
     //     .address(vec![address])
