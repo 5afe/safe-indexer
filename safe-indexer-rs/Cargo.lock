@@ -1613,7 +1613,9 @@ dependencies = [
  "env_logger",
  "ethcontract",
  "log",
+ "reqwest",
  "serde",
+ "serde_json",
  "tokio",
 ]
 
