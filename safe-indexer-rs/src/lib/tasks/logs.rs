@@ -1,15 +1,13 @@
 use crate::config;
 use celery::prelude::*;
 use ethcontract::prelude::*;
-use crate::models::json_rpc::Request;
+use crate::models::json_rpc::{Request, Response};
 
 #[celery::task]
-pub async fn check_incoming_eth(safe_address: String) -> TaskResult<String> {
+pub async fn check_incoming_eth(safe_address: String) -> TaskResult<Vec<String>> {
     let client = reqwest::Client::new();
     let request = Request::build_incoming_eth(&safe_address);
 
-    let json = serde_json::to_string(&request);
-    log::error!("REQUEST: {:#?}", json);
     let response = client.post(config::node_uri())
         .json(&request)
         .send()
@@ -17,7 +15,8 @@ pub async fn check_incoming_eth(safe_address: String) -> TaskResult<String> {
         .text()
         .await.expect("response failed");
 
-    Ok(response)
+    let rpc_response = serde_json::from_str::<Response>(&response).expect("Result deserialize failed");
+    Ok(rpc_response.result.iter().map(|result| result.transaction_hash.to_string()).collect())
 }
 
 // ethcontract-rs implementation
