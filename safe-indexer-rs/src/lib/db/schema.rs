@@ -1,3 +1,5 @@
+use diesel::table;
+
 table! {
     log_entry (transaction_hash, block_number) {
         safe_address -> Nullable<Bpchar>,
