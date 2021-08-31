@@ -16,7 +16,6 @@ async fn main() -> Result<()> {
     let my_app = celery::app!(
         broker = RedisBroker { config::redis_uri() },
         tasks = [
-            tasks::add::add,
             tasks::logs::check_incoming_eth
         ],
         task_routes = [

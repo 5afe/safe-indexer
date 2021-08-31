@@ -18,11 +18,6 @@ async fn main() -> Result<()> {
     let mut beat = celery::beat!(
         broker = RedisBroker { config::redis_uri() },
         tasks = [
-            "add" => {
-                tasks::add::add,
-                schedule = DeltaSchedule::new(Duration::from_secs(3)),
-                args = (1, 2),
-            },
             "check_incoming_eth" => {
                 tasks::logs::check_incoming_eth,
                 schedule = DeltaSchedule::new(Duration::from_secs(15)),
