@@ -31,7 +31,8 @@ async fn main() -> anyhow::Result<()> {
         if next_block <= latest_block {
             next_block += 100;
         } else {
-            log::debug!("Finished the block chain");
+            log::debug!("Finished the block chain, waiting for 10 seconds");
+            sleep(Duration::from_millis(10000)).await;
             continue;
         }
 
