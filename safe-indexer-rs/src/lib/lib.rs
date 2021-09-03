@@ -32,13 +32,11 @@ async fn main() -> anyhow::Result<()> {
             next_block += 100;
         } else {
             log::debug!("Finished the block chain");
-            break;
+            continue;
         }
 
         log::info!("Starting at block: {:#?}", next_block);
         sleep(Duration::from_millis(2000)).await;
         println!("2 seconds passed");
     }
-
-    Ok(())
 }
