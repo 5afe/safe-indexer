@@ -1,18 +1,18 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Serialize, Debug)]
-pub struct Request {
+pub struct RpcRequest {
     pub jsonrpc: String,
     pub method: String,
     pub id: String,
     pub params: Vec<RequestParam>,
 }
 
-#[derive(Deserialize, Serialize, Debug)]
-pub struct Response {
+#[derive(Deserialize, Serialize, Debug, Clone)]
+pub struct RpcResponse<T> {
     pub jsonrpc: String,
     pub id: String,
-    pub result: Vec<Result>,
+    pub result: T,
 }
 
 #[derive(Deserialize, Serialize, Debug)]
@@ -29,7 +29,7 @@ pub enum RequestParam {
 
 #[derive(Deserialize, Serialize, Debug)]
 #[serde(rename_all = "camelCase")]
-pub struct Result {
+pub struct RpcTransaction {
     pub address: String,
     pub block_hash: String,
     pub block_number: String,

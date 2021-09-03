@@ -1,6 +1,6 @@
 use crate::config;
 use celery::prelude::*;
-use crate::models::json_rpc::{Request, Response};
+use crate::rpc::models::{RpcRequest, RpcResponse, RpcTransaction};
 
 // time_limit = 10 can be set to timeout the task
 #[celery::task(
@@ -9,7 +9,7 @@ on_success = incoming_eth_log_success,
 )]
 pub async fn check_incoming_eth(safe_address: String) -> TaskResult<Vec<String>> {
     let client = reqwest::Client::new();
-    let request = Request::build_incoming_eth(&safe_address);
+    let request = RpcRequest::build_incoming_eth(&safe_address);
 
     let response = client.post(config::node_uri())
         .json(&request)
@@ -18,7 +18,7 @@ pub async fn check_incoming_eth(safe_address: String) -> TaskResult<Vec<String>>
         .text()
         .await.expect("response failed");
 
-    let rpc_response = serde_json::from_str::<Response>(&response).expect("Result deserialize failed");
+    let rpc_response = serde_json::from_str::<RpcResponse<Vec<RpcTransaction>>>(&response).expect("Result deserialize failed");
     Ok(rpc_response.result.iter().map(|result| result.transaction_hash.to_string()).collect())
 }
 
