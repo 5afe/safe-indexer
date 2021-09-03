@@ -16,6 +16,10 @@ path = "src/producer/main.rs"
 name = "consumer"
 path = "src/consumer/main.rs"
 
+[[bin]]
+name = "looper"
+path = "src/lib/lib.rs"
+
 [dependencies]
 celery = "0.4.0-rc8"
 celery-codegen = "0.4.0-rc8"
