@@ -26,10 +26,12 @@ async fn main() -> anyhow::Result<()> {
     let start_block = config::start_block();
     let mut next_block = start_block;
 
+    let time_tick_interval = 5000;
+    let block_tick_interval = 1000;
     loop {
         let latest_block = rpc_client.get_current_block().await?;
         if next_block <= latest_block {
-            next_block += 100;
+            next_block += block_tick_interval;
         } else {
             log::debug!("Finished the block chain, waiting for 10 seconds");
             sleep(Duration::from_millis(10000)).await;
@@ -37,7 +39,7 @@ async fn main() -> anyhow::Result<()> {
         }
 
         log::info!("Starting at block: {:#?}", next_block);
-        sleep(Duration::from_millis(2000)).await;
-        println!("2 seconds passed");
+        sleep(Duration::from_millis(time_tick_interval)).await;
+        println!("{} milliseconds have passed", &time_tick_interval);
     }
 }
