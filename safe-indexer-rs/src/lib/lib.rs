@@ -10,11 +10,13 @@ use dotenv::dotenv;
 use tokio::time::sleep;
 use std::time::Duration;
 use crate::rpc::client::RpcClient;
+use crate::rpc::models::BlockNumber;
 
 pub mod config;
 pub mod db;
 pub mod tasks;
 pub mod rpc;
+pub mod number_utils;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -39,6 +41,8 @@ async fn main() -> anyhow::Result<()> {
         }
 
         log::info!("Starting at block: {:#?}", next_block);
+        let result = tasks::logs::check_incoming_eth_impl("0xd6f5Bef6bb4acD235CF85c0ce196316d10785d67", BlockNumber::Value(number_utils::to_hex_string(next_block)?)).await?;
+        log::debug!("get eth result: {:#?}", result);
         sleep(Duration::from_millis(time_tick_interval)).await;
         println!("{} milliseconds have passed", &time_tick_interval);
     }

@@ -9,6 +9,6 @@ pub fn node_uri() -> String {
     env::var("NODE_URI").expect("Please set your NODE_URI")
 }
 
-pub fn start_block() -> i64 {
+pub fn start_block() -> u64 {
     9227661
 }

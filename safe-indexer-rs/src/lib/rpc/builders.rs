@@ -1,13 +1,13 @@
 use crate::rpc::models::{RpcRequest, RequestParam, BlockNumber, Topic};
 
 impl RpcRequest {
-    pub fn build_get_logs(address: &str, topic: Topic) -> Self {
+    pub fn build_get_logs(address: &str, topic: Topic, from: BlockNumber) -> Self {
         RpcRequest {
             jsonrpc: "2.0".to_string(),
             method: "eth_getLogs".to_string(),
             id: "1".to_string(),
             params: vec![RequestParam::Log {
-                from_block: Some(BlockNumber::Earliest),
+                from_block: Some(from),
                 address: address.to_string(),
                 topics: vec![vec![topic.get_hash()]],
             }],

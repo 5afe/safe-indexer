@@ -41,8 +41,9 @@ pub struct RpcTransaction {
     pub transaction_index: String,
 }
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Clone, Debug)]
 #[serde(rename_all = "lowercase")]
+#[serde(untagged)]
 pub enum BlockNumber {
     Value(String),
     Earliest,

@@ -14,11 +14,10 @@ impl RpcClient {
         }
     }
 
-    pub async fn get_current_block(&self) -> anyhow::Result<i64> {
+    pub async fn get_current_block(&self) -> anyhow::Result<u64> {
         let request = RpcRequest::build_get_current_block();
         let response = self.send_request::<String>(&request).await?;
-        let result = &response.result.as_str()[2..response.result.len()];
-        let latest_block_number = i64::from_str_radix(&result, 16)?;
+        let latest_block_number = crate::number_utils::from_hex_string(&response.result)?;
         Ok(latest_block_number)
     }
 

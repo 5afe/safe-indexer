@@ -1,16 +1,23 @@
 use crate::config;
 use celery::prelude::*;
-use crate::rpc::models::{RpcRequest, RpcResponse, RpcTransaction, Topic};
+use crate::rpc::models::{RpcRequest, RpcResponse, RpcTransaction, Topic, BlockNumber};
+use anyhow::Result;
+
 
 // time_limit = 10 can be set to timeout the task
 #[celery::task(
 on_failure = incoming_eth_log_failure,
 on_success = incoming_eth_log_success,
 )]
-pub async fn check_incoming_eth(safe_address: String) -> TaskResult<Vec<String>> {
-    let client = reqwest::Client::new();
-    let request = RpcRequest::build_get_logs(&safe_address, Topic::IncomingEth);
+pub async fn check_incoming_eth(safe_address: String, from: BlockNumber) -> TaskResult<Vec<String>> {
+    Ok(check_incoming_eth_impl(&safe_address, from).await.unwrap())
+}
 
+pub (crate) async fn check_incoming_eth_impl(safe_address: &str, from: BlockNumber) -> Result<Vec<String>>{
+    let client = reqwest::Client::new();
+    let request = RpcRequest::build_get_logs(&safe_address, Topic::IncomingEth, from);
+
+    log::debug!("INCOMING ETH REQ BODY {:#?}", serde_json::to_string(&request).unwrap());
     let response = client.post(config::node_uri())
         .json(&request)
         .send()
