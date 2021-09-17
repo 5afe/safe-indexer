@@ -1,6 +1,6 @@
 use crate::config;
 use celery::prelude::*;
-use crate::rpc::models::{RpcRequest, RpcResponse, RpcTransaction};
+use crate::rpc::models::{RpcRequest, RpcResponse, RpcTransaction, Topic};
 
 // time_limit = 10 can be set to timeout the task
 #[celery::task(
@@ -9,7 +9,7 @@ on_success = incoming_eth_log_success,
 )]
 pub async fn check_incoming_eth(safe_address: String) -> TaskResult<Vec<String>> {
     let client = reqwest::Client::new();
-    let request = RpcRequest::build_incoming_eth(&safe_address);
+    let request = RpcRequest::build_get_logs(&safe_address, Topic::IncomingEth);
 
     let response = client.post(config::node_uri())
         .json(&request)

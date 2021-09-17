@@ -49,3 +49,7 @@ pub enum BlockNumber {
     Latest,
     Pending,
 }
+
+pub enum Topic {
+    IncomingEth, ExecutionSuccess, ExecutionFailure
+}
