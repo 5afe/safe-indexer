@@ -3,7 +3,7 @@ import { ethers } from "ethers";
 import { EventDecoder } from ".";
 import { Event, ModuleTx, SafeInteractionEvent } from "../../types";
 import { moduleFailureTopic, moduleSuccessTopic, safeInterface } from "../constants";
-import { mapsLogs } from "./utils";
+import { mapEvents } from "./utils";
 
 export class ModuleDecoder implements EventDecoder {
 
@@ -49,7 +49,7 @@ export class ModuleDecoder implements EventDecoder {
             type: "module_transaction",
             id,
             timestamp: block.timestamp,
-            logs: await mapsLogs(parentDecoder, subLogs),
+            logs: await mapEvents(parentDecoder, subLogs),
             txHash: event.transactionHash,
             module,
             success,
@@ -62,11 +62,11 @@ export class ModuleDecoder implements EventDecoder {
         switch (event.topics[0]) {
             case moduleSuccessTopic: {
                 const eventParams = safeInterface.decodeEventLog("ExecutionFromModuleSuccess", event.data, event.topics)
-                return await this.decodeInternal(eventParams.address, eventParams.module, event, true, subEvents, detailEvent, parentDecoder)
+                return await this.decodeInternal(event.address, eventParams.module, event, true, subEvents, detailEvent, parentDecoder)
             }
             case moduleFailureTopic: {
                 const eventParams = safeInterface.decodeEventLog("ExecutionFromModuleFailure", event.data, event.topics)
-                return await this.decodeInternal(eventParams.address, eventParams.module, event, false, subEvents, detailEvent, parentDecoder)
+                return await this.decodeInternal(event.address, eventParams.module, event, false, subEvents, detailEvent, parentDecoder)
             }
             default: {
                 return undefined

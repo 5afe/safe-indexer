@@ -3,7 +3,7 @@ import { calculateSafeTransactionHash, EIP712_SAFE_TX_TYPE } from "@gnosis.pm/sa
 import { Event, MultisigTx, SignedSafeTransaction, SafeInteractionEvent } from "../../types";
 import { failureTopic, safeAbi, safeInterface, successTopic } from "../constants";
 import { EventDecoder } from ".";
-import { mapsLogs } from "./utils";
+import { mapEvents } from "./utils";
 
 interface DecodedMultisigTx {
     safe: string,
@@ -131,7 +131,7 @@ export class MultisigDecoder implements EventDecoder {
             type: "multisig_transaction",
             id,
             timestamp: block.timestamp,
-            logs: await mapsLogs(parentDecoder, subLogs),
+            logs: await mapEvents(parentDecoder, subLogs),
             txHash: event.transactionHash,
             safeTxHash,
             success,
@@ -144,11 +144,11 @@ export class MultisigDecoder implements EventDecoder {
         switch (event.topics[0]) {
             case successTopic: {
                 const eventParams = safeInterface.decodeEventLog("ExecutionSuccess", event.data, event.topics)
-                return await this.decodeInternal(eventParams.address, event, eventParams.txHash, true, subEvents, detailEvent, parentDecoder)
+                return await this.decodeInternal(event.address, event, eventParams.txHash, true, subEvents, detailEvent, parentDecoder)
             }
             case failureTopic: {
                 const eventParams = safeInterface.decodeEventLog("ExecutionFailure", event.data, event.topics)
-                return await this.decodeInternal(eventParams.address, event, eventParams.txHash, false, subEvents, detailEvent, parentDecoder)
+                return await this.decodeInternal(event.address, event, eventParams.txHash, false, subEvents, detailEvent, parentDecoder)
             }
             default: {
                 return undefined

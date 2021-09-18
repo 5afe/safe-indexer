@@ -54,8 +54,11 @@ export interface EtherDetails {
     value: string
 }
 
+export interface SafeInteractionEvent {
+    event: Event,
+    interaction?: SafeInteraction
+}
+
 export type TransferDetails = Erc20Details | Erc721Details | EtherDetails
 
 export type SafeInteraction = MultisigTx | ModuleTx | TransferTx
-
-export type SafeInteractionEvent = SafeInteraction | Event
