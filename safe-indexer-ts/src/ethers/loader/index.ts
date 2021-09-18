@@ -1,6 +1,6 @@
 import { ethers } from "ethers";
 import { Loader, Event } from "../../types";
-export * from "./subloaders";
+export * from "./sources";
 
 const isOlder = (compare: ethers.providers.Log | undefined, base: ethers.providers.Log | undefined) => {
     if (compare === undefined) return false
@@ -18,11 +18,11 @@ export interface EventSource {
 export class EthersLoader implements Loader {
 
     provider: ethers.providers.Provider;
-    subLoaders: EventSource[];
+    sources: EventSource[];
 
-    constructor(provider: ethers.providers.Provider, subLoaders: EventSource[]) {
+    constructor(provider: ethers.providers.Provider, sources: EventSource[]) {
         this.provider = provider
-        this.subLoaders = subLoaders
+        this.sources = sources
     }
 
     async loadCurrentBlock(): Promise<number> {
@@ -58,14 +58,16 @@ export class EthersLoader implements Loader {
         return out
     }
 
-    toEvent(logs: ethers.providers.Log): Event {
+    toEvent(log: ethers.providers.Log, safe?: string): Event {
         return {
-            ...logs
+            ...log,
+            eventId: log.logIndex.toString(),
+            account: safe
         }
     }
 
     async loadEvents(from: number, to: number, safe?: string): Promise<Event[]> {
-        const logs = await this.merge(...this.subLoaders.map(l => l.loadEvents(from, to, safe)))
-        return logs.reverse().map(this.toEvent)
+        const logs = await this.merge(...this.sources.map(l => l.loadEvents(from, to, safe)))
+        return logs.reverse().map(e => this.toEvent(e, safe))
     }
 }

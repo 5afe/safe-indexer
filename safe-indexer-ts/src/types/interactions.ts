@@ -1,3 +1,4 @@
+import { MetaTransaction, SafeTransaction } from "@gnosis.pm/safe-contracts"
 import { Event } from "./ethereum"
 
 interface Base {
@@ -6,11 +7,12 @@ interface Base {
 }
 
 export interface ModuleTx extends Base {
-    type: 'module_transaction'
-}
-
-export interface ModuleTxUnknown extends Base {
-    type: 'module_transaction_unknown'
+    type: 'module_transaction',
+    txHash: string,
+    success: boolean,
+    module: string,
+    logs: SafeInteractionEvent[],
+    details?: MetaTransaction
 }
 
 export interface MultisigTx extends Base {
@@ -18,32 +20,19 @@ export interface MultisigTx extends Base {
     safeTxHash: string,
     txHash: string,
     success: boolean,
-    to: string,
-    value: string,
-    data: string,
-    operation: number,
-    safeTxGas: string,
-    baseGas: string,
-    gasPrice: string,
-    gasToken: string,
-    refundReceiver: string,
-    signatures: string,
-    nonce: number,
-    logs: Event[]
+    logs: SafeInteractionEvent[],
+    details?: SignedSafeTransaction
 }
 
-export interface MultisigTxUnknown extends Base {
-    type: 'multisig_transaction_unknown',
-    safeTxHash: string,
-    txHash: string,
-    success: boolean,
-    logs: Event[]
+export interface SignedSafeTransaction extends SafeTransaction {
+    signatures: string
 }
 
 export interface TransferTx extends Base {
-    type: 'Transfer'
+    type: 'transfer'
     sender: string
     receipient: string
+    txHash: string,
     direction: 'INCOMING' | 'OUTGOING'
     details: TransferDetails
 }
@@ -67,4 +56,6 @@ export interface EtherDetails {
 
 export type TransferDetails = Erc20Details | Erc721Details | EtherDetails
 
-export type SafeInteraction = MultisigTx | ModuleTx | MultisigTxUnknown | ModuleTxUnknown | TransferTx
+export type SafeInteraction = MultisigTx | ModuleTx | TransferTx
+
+export type SafeInteractionEvent = SafeInteraction | Event

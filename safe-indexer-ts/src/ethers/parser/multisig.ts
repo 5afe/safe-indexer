@@ -1,7 +1,9 @@
 import { BigNumber, ethers } from "ethers";
 import { calculateSafeTransactionHash, EIP712_SAFE_TX_TYPE } from "@gnosis.pm/safe-contracts";
-import { Event, MultisigTx, MultisigTxUnknown } from "../../types";
-import { safeAbi, safeInterface } from "../constants";
+import { Event, MultisigTx, SignedSafeTransaction, SafeInteractionEvent } from "../../types";
+import { failureTopic, safeAbi, safeInterface, successTopic } from "../constants";
+import { EventDecoder } from ".";
+import { mapsLogs } from "./utils";
 
 interface DecodedMultisigTx {
     safe: string,
@@ -50,14 +52,16 @@ class NonceMapper {
     }
 }
 
-export class MultisigDecoder {
+export class MultisigDecoder implements EventDecoder {
 
     provider: ethers.providers.Provider;
+    useFallbackDecoding: boolean;
     nonceMapper: NonceMapper;
 
-    constructor(provider: ethers.providers.Provider) {
+    constructor(provider: ethers.providers.Provider, useFallbackDecoding?: boolean) {
         this.provider = provider;
         this.nonceMapper = new NonceMapper(provider);
+        this.useFallbackDecoding = useFallbackDecoding || true;
     }
 
     decodeEthereumTx(safe: string, tx: ethers.providers.TransactionResponse): DecodedMultisigTx | undefined {
@@ -87,11 +91,21 @@ export class MultisigDecoder {
         }
     }
 
-    decodeMultisigDetailsEvent(event: Event | undefined): DecodedMultisigTx | undefined {
+    async decodeFromEthereumHash(safe: string, safeTxHash: string, txHash: string): Promise<SignedSafeTransaction | undefined> {
+        console.log("Fallback to transaction decoding")
+        const ethTx = await this.provider.getTransaction(txHash)
+        const decodedTx = this.decodeEthereumTx(safe, ethTx)
+        if (!decodedTx) return undefined;
+        return {
+            ...decodedTx,
+            nonce: await this.nonceMapper.map(safeTxHash, decodedTx)
+        }
+    }
+
+    decodeMultisigDetailsEvent(event: Event | undefined): SignedSafeTransaction | undefined {
         if (!event) return undefined
         const parsed = safeInterface.decodeEventLog("SafeMultiSigTransaction", event.data, event.topics)
         return {
-            safe: event.address,
             to: parsed.to,
             value: parsed.value.toString(),
             data: parsed.data,
@@ -106,34 +120,39 @@ export class MultisigDecoder {
         }
     }
 
-    async decode(safe: string, event: Event, safeTxHash: string, success: boolean, subLogs: Event[], details: Event | undefined): Promise<MultisigTx | MultisigTxUnknown> {
-        let decodedTx: DecodedMultisigTx | undefined
-        decodedTx = this.decodeMultisigDetailsEvent(details)
-        if (!decodedTx) {
-            console.log("Fallback to transaction decoding")
-            const ethTx = await this.provider.getTransaction(event.transactionHash)
-            decodedTx = this.decodeEthereumTx(safe, ethTx)
+    async decodeInternal(safe: string, event: Event, safeTxHash: string, success: boolean, subLogs?: Event[], details?: Event, parentDecoder?: EventDecoder): Promise<MultisigTx> {
+        const id = "multisig_" + safeTxHash
+        let decodedTx: SignedSafeTransaction | undefined = this.decodeMultisigDetailsEvent(details)
+        if (!decodedTx && this.useFallbackDecoding) {
+            decodedTx = await this.decodeFromEthereumHash(safe, safeTxHash, event.transactionHash)
         }
         const block = await this.provider.getBlock(event.blockHash)
-        if (!decodedTx) return {
-            type: "multisig_transaction_unknown",
-            id: "multisig_" + safeTxHash,
-            timestamp: block.timestamp,
-            logs: subLogs,
-            txHash: event.transactionHash,
-            safeTxHash,
-            success
-        }
-        return {
+        const txMeta: MultisigTx = {
             type: "multisig_transaction",
-            id: "multisig_" + safeTxHash,
+            id,
             timestamp: block.timestamp,
-            logs: subLogs,
+            logs: await mapsLogs(parentDecoder, subLogs),
             txHash: event.transactionHash,
             safeTxHash,
             success,
-            ...decodedTx,
-            nonce: decodedTx.nonce || await this.nonceMapper.map(safeTxHash, decodedTx)
-        } 
+            details: decodedTx
+        }
+        return txMeta
+    }
+
+    async decode(event: Event, subEvents?: Event[], detailEvent?: Event, parentDecoder?: EventDecoder): Promise<MultisigTx | undefined> {
+        switch (event.topics[0]) {
+            case successTopic: {
+                const eventParams = safeInterface.decodeEventLog("ExecutionSuccess", event.data, event.topics)
+                return await this.decodeInternal(eventParams.address, event, eventParams.txHash, true, subEvents, detailEvent, parentDecoder)
+            }
+            case failureTopic: {
+                const eventParams = safeInterface.decodeEventLog("ExecutionFailure", event.data, event.topics)
+                return await this.decodeInternal(eventParams.address, event, eventParams.txHash, false, subEvents, detailEvent, parentDecoder)
+            }
+            default: {
+                return undefined
+            }
+        }
     }
 }
