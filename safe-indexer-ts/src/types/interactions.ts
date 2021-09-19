@@ -61,4 +61,17 @@ export interface SafeInteractionEvent {
 
 export type TransferDetails = Erc20Details | Erc721Details | EtherDetails
 
-export type SafeInteraction = MultisigTx | ModuleTx | TransferTx
+export interface SettingsChangeTx extends Base {
+    type: 'settings',
+    txHash: string,
+    component: string,
+    change: 'added' | 'removed' | 'set',
+    value: string
+}
+
+export interface SetupTx extends Base {
+    type: 'setup',
+    txHash: string
+}
+
+export type SafeInteraction = MultisigTx | ModuleTx | TransferTx | SettingsChangeTx | SetupTx

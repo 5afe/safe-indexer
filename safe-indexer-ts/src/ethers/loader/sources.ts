@@ -1,6 +1,6 @@
 import { ethers } from "ethers";
 import { EventSource } from ".";
-import { etherReceivedTopic, failureTopic, moduleDetailsTopic, moduleFailureTopic, moduleSuccessTopic, multisigDetailsTopic, successTopic, transferTopic } from "../constants";
+import { etherReceivedTopic, failureTopic, moduleDetailsTopic, moduleFailureTopic, moduleSuccessTopic, multisigDetailsTopic, safeInterface, successTopic, transferTopic } from "../constants";
 
 abstract class BaseEventSource implements EventSource {
     provider: ethers.providers.Provider;
@@ -50,6 +50,21 @@ export class MultisigTransactionEventSource extends StaticTopicEventSource {
 export class ModuleTransactionEventSource extends StaticTopicEventSource {
     constructor(provider: ethers.providers.Provider) {
         super("Module", [moduleSuccessTopic, moduleFailureTopic, moduleDetailsTopic], provider)
+    }
+}
+
+export class SettingsChangeEventSource extends StaticTopicEventSource {
+    constructor(provider: ethers.providers.Provider) {
+        super("Settings", [
+            "SafeSetup",
+            "AddedOwner",
+            "RemovedOwner",
+            "ChangedThreshold",
+            "EnabledModule",
+            "DisabledModule",
+            "ChangedFallbackHandler",
+            "ChangedGuard",
+        ].map((name) => safeInterface.getEventTopic(name)), provider)
     }
 }
 

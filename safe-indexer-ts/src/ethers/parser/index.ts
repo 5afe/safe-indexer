@@ -3,6 +3,7 @@ import { Event, Parser, SafeInteraction } from "../../types";
 import { detailsTopics, etherReceivedTopic, failureTopic, moduleFailureTopic, moduleSuccessTopic, parentTopics, safeInterface, successTopic, transferTopic } from "../constants";
 import { ModuleDecoder } from "./module";
 import { MultisigDecoder } from "./multisig";
+import { SettingsDecoder } from "./settings";
 import { TransferDecoder } from "./transfers";
 
 interface GroupedLogs {
@@ -30,7 +31,8 @@ export class EthersParser implements Parser, EventDecoder {
         this.decoders = [
             new MultisigDecoder(provider),
             new ModuleDecoder(provider),
-            new TransferDecoder(provider)
+            new TransferDecoder(provider),
+            new SettingsDecoder(provider)
         ]
     }
 
