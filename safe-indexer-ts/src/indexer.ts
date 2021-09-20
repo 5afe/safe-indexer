@@ -13,6 +13,7 @@ export interface Logger {
 
 export interface SafeIndexerConfig {
     safe?: string,
+    chainId?: number,
     maxBlocks?: number,
     logger?: Logger,
     upToDateTimeout?: number,
@@ -39,12 +40,16 @@ export class SafeIndexer {
         this.loader = loader;
         this.parser = parser;
         this.callback = callback;
-        console.log(config)
         this.config = { ...configDefaults, ...config };
         console.log(this.config)
     }
 
     async start() {
+        const activeChainId = await this.loader.loadChainId()
+        if (this.config.chainId && activeChainId != this.config.chainId) {
+            this.config.logger?.error(`Wrong chain! Expected ${this.config.chainId} got ${activeChainId}`)
+            return
+        }
         this.indexing = true;
         while(this.indexing) {
             if (this.paused) {

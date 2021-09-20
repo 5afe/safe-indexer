@@ -25,6 +25,11 @@ export class EthersLoader implements Loader {
         this.sources = sources
     }
 
+    async loadChainId(): Promise<number> {
+        const network = await this.provider.getNetwork()
+        return network.chainId
+    }
+
     async loadCurrentBlock(): Promise<number> {
         return await this.provider.getBlockNumber()
     }

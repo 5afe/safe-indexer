@@ -23,7 +23,7 @@ interface DecodedMultisigTx {
 class NonceMapper {
 
     provider: ethers.providers.Provider;
-    chainId: number|undefined;
+    chainId: number | undefined;
 
     constructor(provider: ethers.providers.Provider) {
         this.provider = provider
@@ -34,7 +34,7 @@ class NonceMapper {
     }
 
     calculateHash111(tx: DecodedMultisigTx, nonce: number): string {
-        return ethers.utils._TypedDataEncoder.hash({ verifyingContract: tx.safe }, EIP712_SAFE_TX_TYPE, {...tx, nonce})
+        return ethers.utils._TypedDataEncoder.hash({ verifyingContract: tx.safe }, EIP712_SAFE_TX_TYPE, { ...tx, nonce })
     }
 
     async map(expectedHash: string, tx: DecodedMultisigTx): Promise<number> {
@@ -46,7 +46,7 @@ class NonceMapper {
         const currentNonce = (await safe.nonce()).toNumber()
         for (let nonce = currentNonce; nonce >= 0; nonce--) {
             if (this.calculateHash111(tx, nonce) === expectedHash) return nonce
-            if (calculateSafeTransactionHash(safe, {...tx, nonce}, this.chainId!!) === expectedHash) return nonce
+            if (calculateSafeTransactionHash(safe, { ...tx, nonce }, this.chainId!!) === expectedHash) return nonce
         }
         return -1
     }

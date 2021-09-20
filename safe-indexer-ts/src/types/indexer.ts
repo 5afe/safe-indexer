@@ -5,7 +5,8 @@ export interface State {
     lastIndexedBlock: number;  
 }
 
-export interface Loader {
+export interface Loader { 
+    loadChainId(): Promise<number>
     loadCurrentBlock(): Promise<number>
     loadEvents(from: number, to: number, safe?: string): Promise<Event[]>
 }
