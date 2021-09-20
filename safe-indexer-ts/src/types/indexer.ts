@@ -15,7 +15,28 @@ export interface Parser {
     parse(events: Event[]): Promise<SafeInteraction[]>
 }
 
+export interface Aborted {
+    type: "aborted"
+    code: number
+    reason: string
+}
+
+export interface Processing {
+    type: "processing",
+    fromBlock: number,
+    toBlock: number,
+    latestBlock: number
+}
+
+export interface UpToDate {
+    type: "up_to_date"
+    latestBlock: number
+}
+
+export type IndexerStatus = Processing | UpToDate | Aborted
+
 export interface Callback {
     onNewInteractions(interactions: SafeInteraction[]): void;
+    onStatusUpdate?: (status: IndexerStatus) => void;
 }
 

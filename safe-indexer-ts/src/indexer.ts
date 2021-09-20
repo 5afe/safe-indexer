@@ -1,4 +1,4 @@
-import { Callback, Loader, Parser, State } from "./types";
+import { Callback, Loader, Parser, State, IndexerStatus } from "./types";
 
 const sleep = (timeout: number) => new Promise(cb => setTimeout(cb, timeout))
 
@@ -44,10 +44,20 @@ export class SafeIndexer {
         console.log(this.config)
     }
 
+    postStatusUpdate(status: IndexerStatus) {
+        try {
+            this.callback?.onStatusUpdate?.(status)
+        } catch (e) {
+            console.error(e)
+        }
+    }
+
     async start() {
         const activeChainId = await this.loader.loadChainId()
         if (this.config.chainId && activeChainId != this.config.chainId) {
-            this.config.logger?.error(`Wrong chain! Expected ${this.config.chainId} got ${activeChainId}`)
+            const errorMsg = `Wrong chain! Expected ${this.config.chainId} got ${activeChainId}`
+            this.config.logger?.error(errorMsg)
+            this.postStatusUpdate({ type: "aborted", reason: errorMsg, code: 1 });
             return
         }
         this.indexing = true;
@@ -59,10 +69,12 @@ export class SafeIndexer {
             const currentBlock = await this.loader.loadCurrentBlock()
             if (currentBlock <= this.state.lastIndexedBlock) {
                 this.config.logger?.log("Up to date with current block!")
+                this.postStatusUpdate({ type: "up_to_date", latestBlock: currentBlock });
                 await conditionalSleep(this.config.upToDateTimeout)
                 continue
             }
             const targetBlock = Math.min(currentBlock, this.state.lastIndexedBlock + (this.config.maxBlocks || 100))
+            this.postStatusUpdate({ type: "processing", fromBlock: this.state.lastIndexedBlock + 1, toBlock: targetBlock, latestBlock: currentBlock });
             this.config.logger?.log("Process from block", this.state.lastIndexedBlock, "to block", targetBlock)
             try {
                 await this.processBlocks(this.state.lastIndexedBlock, targetBlock)

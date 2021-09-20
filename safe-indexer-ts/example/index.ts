@@ -1,5 +1,5 @@
 import { ethers } from "ethers";
-import { EthersLoader, EthersParser, IncomingEthEventSource, IncomingTransferEventSource, ModuleTransactionEventSource, MultisigTransactionEventSource, OutgoingTransferEventSource, SafeIndexer, SafeInteraction, SettingsChangeEventSource } from "../src"
+import { EthersLoader, EthersParser, IncomingEthEventSource, IncomingTransferEventSource, IndexerStatus, ModuleTransactionEventSource, MultisigTransactionEventSource, OutgoingTransferEventSource, SafeIndexer, SafeInteraction, SettingsChangeEventSource } from "../src"
 import dotenv from "dotenv";
 dotenv.config()
 
@@ -16,7 +16,8 @@ const loader = new EthersLoader(provider, [
 ])
 const parser = new EthersParser(provider)
 const callback = {
-    onNewInteractions: (interactions: SafeInteraction[]) => console.log(interactions)
+    onNewInteractions: (interactions: SafeInteraction[]) => console.log(interactions),
+    onStatusUpdate: (status: IndexerStatus) => console.log(status)
 }
 const indexer = new SafeIndexer(state, loader, parser, callback, { chainId: 4, safe: "0x969c350577B6CD3A8E963cBB8D9c728B840c459e", maxBlocks: 10000 })
 indexer.start()
