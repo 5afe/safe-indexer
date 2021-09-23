@@ -66,19 +66,20 @@ export class SafeIndexer {
                 await sleep(this.config.syncTimeout || 100)
                 continue
             }
-            const currentBlock = await this.loader.loadCurrentBlock()
-            if (currentBlock <= this.state.lastIndexedBlock) {
+            const latestBlock = await this.loader.loadCurrentBlock()
+            if (latestBlock <= this.state.lastIndexedBlock) {
                 this.config.logger?.log("Up to date with current block!")
-                this.postStatusUpdate({ type: "up_to_date", latestBlock: currentBlock });
+                this.postStatusUpdate({ type: "up_to_date", latestBlock });
                 await conditionalSleep(this.config.upToDateTimeout)
                 continue
             }
-            const targetBlock = Math.min(currentBlock, this.state.lastIndexedBlock + (this.config.maxBlocks || 100))
-            this.postStatusUpdate({ type: "processing", fromBlock: this.state.lastIndexedBlock + 1, toBlock: targetBlock, latestBlock: currentBlock });
-            this.config.logger?.log("Process from block", this.state.lastIndexedBlock, "to block", targetBlock)
+            const fromBlock = this.state.lastIndexedBlock + 1
+            const toBlock = Math.min(latestBlock, this.state.lastIndexedBlock + (this.config.maxBlocks || 100))
+            this.postStatusUpdate({ type: "processing", fromBlock, toBlock, latestBlock });
+            this.config.logger?.log("Process from block", fromBlock, "to block", toBlock)
             try {
-                await this.processBlocks(this.state.lastIndexedBlock, targetBlock)
-                this.state.lastIndexedBlock = targetBlock
+                await this.processBlocks(fromBlock, toBlock)
+                this.state.lastIndexedBlock = toBlock
                 await conditionalSleep(this.config.syncTimeout)
             } catch (e) {
                 this.config.logger?.error(e)
