@@ -1,7 +1,7 @@
 use anyhow::Result;
 use celery::beat::DeltaSchedule;
 use celery::prelude::*;
-use commons::{config, tasks};
+use commons::{config, tasks, rpc::models::BlockNumber};
 use dotenv::dotenv;
 use tokio::time::Duration;
 
@@ -19,9 +19,9 @@ async fn main() -> Result<()> {
         broker = RedisBroker { config::redis_uri() },
         tasks = [
             "check_incoming_eth" => {
-                tasks::logs::check_incoming_eth,
+                tasks::celery::check_incoming_eth,
                 schedule = DeltaSchedule::new(Duration::from_secs(15)),
-                args = ("0xd6f5Bef6bb4acD235CF85c0ce196316d10785d67".to_string(),),
+                args = ("0xd6f5Bef6bb4acD235CF85c0ce196316d10785d67".to_string(), BlockNumber::Earliest),
             }
         ],
         task_routes = [

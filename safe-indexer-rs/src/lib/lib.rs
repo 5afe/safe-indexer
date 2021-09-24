@@ -32,18 +32,21 @@ async fn main() -> anyhow::Result<()> {
     let block_tick_interval = 1000;
     loop {
         let latest_block = rpc_client.get_current_block().await?;
-        if next_block <= latest_block {
-            next_block += block_tick_interval;
-        } else {
+        if next_block >= latest_block {
             log::debug!("Finished the block chain, waiting for 10 seconds");
             sleep(Duration::from_millis(10000)).await;
             continue;
         }
 
-        log::info!("Starting at block: {:#?}", next_block);
-        let result = tasks::logs::check_incoming_eth_impl("0xd6f5Bef6bb4acD235CF85c0ce196316d10785d67", BlockNumber::Value(number_utils::to_hex_string(next_block)?)).await?;
-        log::debug!("get eth result: {:#?}", result);
+        let result = tasks::impls::check_incoming_eth("0xd6f5Bef6bb4acD235CF85c0ce196316d10785d67", BlockNumber::Value(number_utils::to_hex_string(next_block)?)).await?;
+        log::info!("Starting at block        : {:#?}", start_block);
+        log::info!("Requesting logs for block: {:#?}", &next_block);
+        log::info!("Current block            : {:#?}", &latest_block);
+        log::info!("Block step interval      : {:#?}", &block_tick_interval);
+        log::info!("Incoming eth tx hashes   : {:#?}", result);
+        log::info!("Sleeping for {} milliseconds", &time_tick_interval);
         sleep(Duration::from_millis(time_tick_interval)).await;
-        println!("{} milliseconds have passed", &time_tick_interval);
+
+        next_block += block_tick_interval;
     }
 }

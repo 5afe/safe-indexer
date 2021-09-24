@@ -10,23 +10,7 @@ on_failure = incoming_eth_log_failure,
 on_success = incoming_eth_log_success,
 )]
 pub async fn check_incoming_eth(safe_address: String, from: BlockNumber) -> TaskResult<Vec<String>> {
-    Ok(check_incoming_eth_impl(&safe_address, from).await.unwrap())
-}
-
-pub (crate) async fn check_incoming_eth_impl(safe_address: &str, from: BlockNumber) -> Result<Vec<String>>{
-    let client = reqwest::Client::new();
-    let request = RpcRequest::build_get_logs(&safe_address, Topic::IncomingEth, from);
-
-    log::debug!("INCOMING ETH REQ BODY {:#?}", serde_json::to_string(&request).unwrap());
-    let response = client.post(config::node_uri())
-        .json(&request)
-        .send()
-        .await.expect("request failed")
-        .text()
-        .await.expect("response failed");
-
-    let rpc_response = serde_json::from_str::<RpcResponse<Vec<RpcTransaction>>>(&response).expect("Result deserialize failed");
-    Ok(rpc_response.result.iter().map(|result| result.transaction_hash.to_string()).collect())
+    Ok(super::impls::check_incoming_eth(&safe_address, from).await.map_err(|error| TaskError::ExpectedError(error.to_string()))?)
 }
 
 async fn incoming_eth_log_failure<T: Task>(task: &T, err: &TaskError) {

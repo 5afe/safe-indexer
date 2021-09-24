@@ -10,5 +10,5 @@ pub fn node_uri() -> String {
 }
 
 pub fn start_block() -> u64 {
-    9227661
+    9183130
 }
