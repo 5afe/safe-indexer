@@ -26,10 +26,10 @@ async fn main() -> anyhow::Result<()> {
     let rpc_client = RpcClient::new(reqwest::Client::new());
 
     let start_block = config::start_block();
-    let mut next_block = start_block;
+    let time_tick_interval = config::iteration_sleep_interval();
+    let block_tick_interval = config::block_step();
 
-    let time_tick_interval = 5000;
-    let block_tick_interval = 1000;
+    let mut next_block = start_block;
     loop {
         let latest_block = rpc_client.get_current_block().await?;
         if next_block >= latest_block {
@@ -41,6 +41,7 @@ async fn main() -> anyhow::Result<()> {
         let result_incoming_eth = tasks::impls::check_incoming_eth("0xd6f5Bef6bb4acD235CF85c0ce196316d10785d67", BlockNumber::Value(number_utils::to_hex_string(next_block)?)).await?;
         let result_execution_success = tasks::impls::check_execution_success("0xd6f5Bef6bb4acD235CF85c0ce196316d10785d67", BlockNumber::Value(number_utils::to_hex_string(next_block)?)).await?;
         let result_execution_failure = tasks::impls::check_execution_failure("0xd6f5Bef6bb4acD235CF85c0ce196316d10785d67", BlockNumber::Value(number_utils::to_hex_string(next_block)?)).await?;
+
         log::info!("Starting at block            : {:#?}", start_block);
         log::info!("Requesting logs for block    : {:#?}", &next_block);
         log::info!("Current block                : {:#?}", &latest_block);
@@ -49,8 +50,8 @@ async fn main() -> anyhow::Result<()> {
         log::info!("Incoming exec success hashes : {:#?}", result_execution_success);
         log::info!("Incoming exec failure hashes : {:#?}", result_execution_failure);
         log::info!("Sleeping for {} milliseconds", &time_tick_interval);
-        sleep(Duration::from_millis(time_tick_interval)).await;
 
+        sleep(Duration::from_millis(time_tick_interval)).await;
         next_block += block_tick_interval;
     }
 }
