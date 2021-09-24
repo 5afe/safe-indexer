@@ -3,5 +3,7 @@ export interface Event {
     data: string,
     address: string,
     blockHash: string,
-    transactionHash: string
+    transactionHash: string,
+    eventId: string,
+    account?: string
 }

@@ -1,7 +1,10 @@
 import { ethers } from "ethers";
 import { Event, Parser, SafeInteraction } from "../../types";
-import { detailsTopics, failureTopic, moduleFailureTopic, moduleSuccessTopic, parentTopics, safeInterface, successTopic } from "../constants";
+import { detailsTopics, etherReceivedTopic, failureTopic, moduleFailureTopic, moduleSuccessTopic, parentTopics, safeInterface, successTopic, transferTopic } from "../constants";
+import { ModuleDecoder } from "./module";
 import { MultisigDecoder } from "./multisig";
+import { SettingsDecoder } from "./settings";
+import { TransferDecoder } from "./transfers";
 
 interface GroupedLogs {
     parent: Event,
@@ -9,20 +12,28 @@ interface GroupedLogs {
     children: Event[]
 }
 
+export interface EventDecoder {
+    decode(event: Event, subEvents?: Event[], detailEvent?: Event, parentDecoder?: EventDecoder): Promise<SafeInteraction | undefined>
+}
+
 export interface ParserConfig {
     provider: ethers.providers.Provider,
     multisigDecoder: MultisigDecoder
 }
 
-export class EthersParser implements Parser {
+export class EthersParser implements Parser, EventDecoder {
 
     provider: ethers.providers.Provider;
-    multisigDecoder: MultisigDecoder;
-    safe?: string;
+    decoders: EventDecoder[];
 
     constructor(provider: ethers.providers.Provider) {
         this.provider = provider;
-        this.multisigDecoder = new MultisigDecoder(provider);
+        this.decoders = [
+            new MultisigDecoder(provider),
+            new ModuleDecoder(provider),
+            new TransferDecoder(provider),
+            new SettingsDecoder(provider)
+        ]
     }
 
     private updateGroupedLogs(groups: GroupedLogs[], detailsCandidate: Event | undefined, parentCandidate: Event | undefined, currentChildren: Event[]) {
@@ -69,35 +80,16 @@ export class EthersParser implements Parser {
         return out
     }
 
-    async map(group: GroupedLogs): Promise<SafeInteraction | undefined> {
-        const { parent, children, details } = group
-        switch (parent.topics[0]) {
-            case successTopic: {
-                const event = safeInterface.decodeEventLog("ExecutionSuccess", parent.data, parent.topics)
-                return await this.multisigDecoder.decode(parent.address, parent, event.txHash, true, children, details)
-            }
-            case failureTopic: {
-                const event = safeInterface.decodeEventLog("ExecutionFailure", parent.data, parent.topics)
-                return await this.multisigDecoder.decode(parent.address, parent, event.txHash, true, children, details)
-            }
-            case moduleSuccessTopic: {
-                const event = safeInterface.decodeEventLog("ExecutionFromModuleSuccess", parent.data, parent.topics)
-                return undefined // await moduleTxEntry(provider, parent, event.module, true, children, details)
-            }
-            case moduleFailureTopic: {
-                const event = safeInterface.decodeEventLog("ExecutionFromModuleFailure", parent.data, parent.topics)
-                return undefined // await moduleTxEntry(provider, parent, event.module, false, children, details)
-            }
-            default: {
-                console.error("Received unknown event", parent)
-                return undefined
-            }
+    async decode(event: Event, subEvents?: Event[], detailEvent?: Event): Promise<SafeInteraction | undefined> {
+        for (const decoder of this.decoders) {
+            const interaction = await decoder.decode(event, subEvents, detailEvent, this)
+            if (interaction) return interaction
         }
     }
 
     async parse(events: Event[]): Promise<SafeInteraction[]> {
         const groups = await this.group(events)
-        const inter = groups.map((group) => this.map(group))
+        const inter = groups.map(({ parent, children, details }) => this.decode(parent, children, details))
         return (await Promise.all(inter)).filter((e) => e !== undefined) as SafeInteraction[]
     }
 }
