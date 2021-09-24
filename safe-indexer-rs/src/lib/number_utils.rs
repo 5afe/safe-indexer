@@ -1,5 +1,4 @@
 use anyhow::Result;
-use std::fmt::format;
 
 pub fn to_hex_string(input: u64) -> Result<String> {
     Ok(format!("0x{:x}", input))

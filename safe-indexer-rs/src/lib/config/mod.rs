@@ -1,7 +1,5 @@
 use std::env;
-use crate::rpc::models::BlockNumber;
 use std::str::FromStr;
-use std::fmt::Debug;
 
 pub fn redis_uri() -> String {
     env::var("REDIS_URI").expect("Please set your REDIS_URI")

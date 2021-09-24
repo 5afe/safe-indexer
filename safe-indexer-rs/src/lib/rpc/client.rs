@@ -1,6 +1,5 @@
 use crate::rpc::models::{RpcRequest, RpcResponse};
 use crate::config;
-use serde::Deserialize;
 use serde::de::DeserializeOwned;
 
 pub struct RpcClient {

@@ -1,7 +1,5 @@
-use crate::config;
 use celery::prelude::*;
-use crate::rpc::models::{RpcRequest, RpcResponse, RpcTransaction, Topic, BlockNumber};
-use anyhow::Result;
+use crate::rpc::models::{Topic, BlockNumber};
 
 // time_limit = 10 can be set to timeout the task
 #[celery::task(
