@@ -14,6 +14,15 @@ impl RpcRequest {
         }
     }
 
+    pub fn build_get_transaction_by_hash(tx_hash: &str) -> Self {
+        RpcRequest{
+            jsonrpc: "2.0".to_string(),
+            method: "eth_getTransactionByHash".to_string(),
+            id: "1".to_string(),
+            params: vec![RequestParam::Single(tx_hash.to_string())]
+        }
+    }
+
     pub fn build_get_current_block() -> Self {
         RpcRequest {
             jsonrpc: "2.0".to_string(),

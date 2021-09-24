@@ -48,6 +48,11 @@ async fn main() -> anyhow::Result<()> {
             rpc_client.get_transaction_hashes_for_event(safe_address, next_block, Topic::SafeMultisigTransaction),
         )?;
 
+        let (eth_transactions, success_transaction) = try_join!(
+            rpc_client.get_transaction(result_incoming_eth.first().unwrap()),
+            rpc_client.get_transaction(result_exec_success.first().unwrap()),
+        )?;
+
         log::info!("========================================================================");
         log::info!("Starting at block             : {:#?}", start_block);
         log::info!("Requesting logs for block     : {:#?}", &next_block);
@@ -57,6 +62,9 @@ async fn main() -> anyhow::Result<()> {
         log::info!("Execution success hashes      : {:#?}", result_exec_success);
         log::info!("Execution failure hashes      : {:#?}", result_exec_failure);
         log::info!("Execution Multisig hashes     : {:#?}", result_multisig_txs);
+        log::info!("========================================================================");
+        log::info!("Incoming ETH transactions     : {:#?}", eth_transactions);
+        log::info!("Success Multisig transactions : {:#?}", success_transaction);
         log::info!("Sleeping for {} milliseconds", &time_tick_interval);
         log::info!("========================================================================");
 

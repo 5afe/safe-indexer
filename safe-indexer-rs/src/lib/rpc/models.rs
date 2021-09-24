@@ -29,7 +29,7 @@ pub enum RequestParam {
 
 #[derive(Deserialize, Serialize, Debug)]
 #[serde(rename_all = "camelCase")]
-pub struct RpcTransaction {
+pub struct RpcTransactionLog {
     pub address: String,
     pub block_hash: String,
     pub block_number: String,
@@ -39,6 +39,22 @@ pub struct RpcTransaction {
     pub topics: Vec<String>,
     pub transaction_hash: String,
     pub transaction_index: String,
+}
+
+#[derive(Deserialize, Serialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct RpcTransaction {
+    pub block_hash: String,
+    pub block_number: String,
+    pub chain_id: String,
+    pub from: String,
+    pub gas: String,
+    pub gas_price: String,
+    pub hash: String,
+    pub input: String,
+    pub nonce: String,
+    pub transaction_index: String,
+    pub value: String,
 }
 
 #[derive(Deserialize, Serialize, Clone, Debug)]
@@ -56,5 +72,5 @@ pub enum Topic {
     IncomingEth,
     ExecutionSuccess,
     ExecutionFailure,
-    SafeMultisigTransaction
+    SafeMultisigTransaction,
 }
