@@ -52,7 +52,7 @@ export class SafeIndexer {
         }
     }
 
-    async start() {
+    async start(reverse?: boolean) {
         const activeChainId = await this.loader.loadChainId()
         if (this.config.chainId && activeChainId != this.config.chainId) {
             const errorMsg = `Wrong chain! Expected ${this.config.chainId} got ${activeChainId}`
@@ -67,19 +67,27 @@ export class SafeIndexer {
                 continue
             }
             const latestBlock = await this.loader.loadCurrentBlock()
-            if (latestBlock <= this.state.lastIndexedBlock) {
-                this.config.logger?.log("Up to date with current block!")
-                this.postStatusUpdate({ type: "up_to_date", latestBlock });
-                await conditionalSleep(this.config.upToDateTimeout)
-                continue
+            let fromBlock;
+            let toBlock;
+            if (reverse) {
+                fromBlock = this.state.lastIndexedBlock + 1
+                toBlock = Math.min(latestBlock, this.state.lastIndexedBlock + (this.config.maxBlocks || 100))
+            } else {
+                if (latestBlock <= this.state.lastIndexedBlock) {
+                    this.config.logger?.log("Up to date with current block!")
+                    this.postStatusUpdate({ type: "up_to_date", latestBlock });
+                    await conditionalSleep(this.config.upToDateTimeout)
+                    continue
+                }
+                fromBlock = this.state.lastIndexedBlock + 1
+                toBlock = Math.min(latestBlock, this.state.lastIndexedBlock + (this.config.maxBlocks || 100))
             }
-            const fromBlock = this.state.lastIndexedBlock + 1
-            const toBlock = Math.min(latestBlock, this.state.lastIndexedBlock + (this.config.maxBlocks || 100))
             this.postStatusUpdate({ type: "processing", fromBlock, toBlock, latestBlock });
             this.config.logger?.log("Process from block", fromBlock, "to block", toBlock)
             try {
                 await this.processBlocks(fromBlock, toBlock)
-                this.state.lastIndexedBlock = toBlock
+                this.state.lastIndexedBlock = Math.max(toBlock, this.state.lastIndexedBlock)
+                this.state.earliestIndexedBlock = Math.min(fromBlock, this.state.earliestIndexedBlock)
                 await conditionalSleep(this.config.syncTimeout)
             } catch (e) {
                 this.config.logger?.error(e)

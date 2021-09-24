@@ -2,6 +2,7 @@ import { SafeInteraction } from "./interactions";
 import { Event } from "./ethereum";
 
 export interface State {
+    earliestIndexedBlock: number; 
     lastIndexedBlock: number;  
 }
 
