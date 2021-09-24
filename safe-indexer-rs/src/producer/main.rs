@@ -1,7 +1,7 @@
 use anyhow::Result;
 use celery::beat::DeltaSchedule;
 use celery::prelude::*;
-use commons::{config, tasks, rpc::models::BlockNumber};
+use commons::{config, number_utils, tasks, rpc::models::{BlockNumber, Topic}};
 use dotenv::dotenv;
 use tokio::time::Duration;
 
@@ -15,20 +15,31 @@ async fn main() -> Result<()> {
     dotenv().ok();
     env_logger::init();
 
+    // TODO, this always checks the same BlockNumber, there needs to be a way to move forward the blockNumber
     let mut beat = celery::beat!(
         broker = RedisBroker { config::redis_uri() },
         tasks = [
-            "check_incoming_eth" => {
-                tasks::celery::check_incoming_eth,
+            "INCOMING ETH" => {
+                tasks::celery::tx_hashes_for_topic,
                 schedule = DeltaSchedule::new(Duration::from_secs(15)),
-                args = ("0xd6f5Bef6bb4acD235CF85c0ce196316d10785d67".to_string(), BlockNumber::Earliest),
-            }
+                args = ("0xd6f5Bef6bb4acD235CF85c0ce196316d10785d67".to_string(), BlockNumber::Value(number_utils::to_hex_string(config::start_block()).expect("Bad block number")), Topic::IncomingEth),
+                },
+            "EXECUTION SUCCESS" => {
+                tasks::celery::tx_hashes_for_topic,
+                schedule = DeltaSchedule::new(Duration::from_secs(15)),
+                args = ("0xd6f5Bef6bb4acD235CF85c0ce196316d10785d67".to_string(), BlockNumber::Value(number_utils::to_hex_string(config::start_block()).expect("Bad block number")), Topic::ExecutionSuccess),
+                },
+            "EXECUTION FAILURE" => {
+                tasks::celery::tx_hashes_for_topic,
+                schedule = DeltaSchedule::new(Duration::from_secs(15)),
+                args = ("0xd6f5Bef6bb4acD235CF85c0ce196316d10785d67".to_string(), BlockNumber::Value(number_utils::to_hex_string(config::start_block()).expect("Bad block number")), Topic::ExecutionFailure),
+                }
         ],
         task_routes = [
             "*" => tasks::QUEUE_NAME,
         ],
     )
-    .await?;
+        .await?;
 
     beat.start().await?;
     Ok(())

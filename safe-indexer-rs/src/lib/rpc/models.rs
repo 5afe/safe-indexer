@@ -51,6 +51,9 @@ pub enum BlockNumber {
     Pending,
 }
 
+#[derive(Deserialize, Serialize, Clone, Debug)]
 pub enum Topic {
-    IncomingEth, ExecutionSuccess, ExecutionFailure
+    IncomingEth,
+    ExecutionSuccess,
+    ExecutionFailure,
 }

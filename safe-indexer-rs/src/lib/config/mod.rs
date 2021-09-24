@@ -12,9 +12,7 @@ pub fn node_uri() -> String {
 }
 
 pub fn start_block() -> u64 {
-    // value for incoming eth for
-    // 9183130
-    env_with_default("START_BLOCK_NUMBER", 9348452)
+    env_with_default("START_BLOCK_NUMBER", 9183130)
 }
 
 pub fn iteration_sleep_interval() -> u64 {
