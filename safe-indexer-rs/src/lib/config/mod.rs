@@ -10,7 +10,7 @@ pub fn node_uri() -> String {
 }
 
 pub fn start_block() -> u64 {
-    env_with_default("START_BLOCK_NUMBER", 9183130)
+    env_with_default("START_BLOCK_NUMBER", 9177270)
 }
 
 pub fn iteration_sleep_interval() -> u64 {
