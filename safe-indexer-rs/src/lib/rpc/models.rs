@@ -56,4 +56,5 @@ pub enum Topic {
     IncomingEth,
     ExecutionSuccess,
     ExecutionFailure,
+    SafeMultisigTransaction
 }

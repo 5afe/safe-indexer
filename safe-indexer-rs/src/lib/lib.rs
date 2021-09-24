@@ -40,20 +40,22 @@ async fn main() -> anyhow::Result<()> {
             continue;
         }
 
-        let (result_incoming_eth, result_exec_success, result_exec_failure) = try_join!(
+        let (result_incoming_eth, result_exec_success, result_exec_failure, result_multisig_txs) = try_join!(
             tasks::impls::tx_hashes_for_topic(safe_address, BlockNumber::Value(number_utils::to_hex_string(next_block)?), Topic::IncomingEth),
             tasks::impls::tx_hashes_for_topic(safe_address, BlockNumber::Value(number_utils::to_hex_string(next_block)?), Topic::ExecutionSuccess),
-             tasks::impls::tx_hashes_for_topic(safe_address, BlockNumber::Value(number_utils::to_hex_string(next_block)?), Topic::ExecutionFailure)
+            tasks::impls::tx_hashes_for_topic(safe_address, BlockNumber::Value(number_utils::to_hex_string(next_block)?), Topic::ExecutionFailure),
+            tasks::impls::tx_hashes_for_topic(safe_address, BlockNumber::Value(number_utils::to_hex_string(next_block)?), Topic::SafeMultisigTransaction),
         )?;
 
         log::info!("========================================================================");
-        log::info!("Starting at block            : {:#?}", start_block);
-        log::info!("Requesting logs for block    : {:#?}", &next_block);
-        log::info!("Current block                : {:#?}", &latest_block);
-        log::info!("Block step interval          : {:#?}", &block_tick_interval);
-        log::info!("Incoming eth tx hashes       : {:#?}", result_incoming_eth);
-        log::info!("Execution success hashes     : {:#?}", result_exec_success);
-        log::info!("Execution failure hashes     : {:#?}", result_exec_failure);
+        log::info!("Starting at block             : {:#?}", start_block);
+        log::info!("Requesting logs for block     : {:#?}", &next_block);
+        log::info!("Current block                 : {:#?}", &latest_block);
+        log::info!("Block step interval           : {:#?}", &block_tick_interval);
+        log::info!("Incoming eth tx hashes        : {:#?}", result_incoming_eth);
+        log::info!("Execution success hashes      : {:#?}", result_exec_success);
+        log::info!("Execution failure hashes      : {:#?}", result_exec_failure);
+        log::info!("Execution Multisig hashes     : {:#?}", result_multisig_txs);
         log::info!("Sleeping for {} milliseconds", &time_tick_interval);
         log::info!("========================================================================");
 
