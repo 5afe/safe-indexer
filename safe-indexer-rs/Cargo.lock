@@ -1145,6 +1145,7 @@ name = "safe-indexer-rs"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "async-trait",
  "celery",
  "celery-codegen",
  "diesel",
