@@ -29,8 +29,8 @@ impl Topic {
     pub fn get_hash(&self) -> String {
         match self{
             Topic::IncomingEth => String::from("0x3d0ce9bfc3ed7d6862dbb28b2dea94561fe714a1b4d019aa8af39730d1ad7c3d"),
-            Topic::ExecutionSuccess => String::from("0x17d07c166ac116d0e12be36f9d21670849dd8f7a6dd91a7edf56c83f07c8622e"),
-            Topic::ExecutionFailure => String::from("0x9304a5b1a17f881c79a07cd051dc098979104b9d1574dcdc4ad5d1b6acae4900"),
+            Topic::ExecutionSuccess => String::from("0x442e715f626346e8c54381002da614f62bee8d27386535b2521ec8540898556e"),
+            Topic::ExecutionFailure => String::from("0x23428b18acfb3ea64b08dc0c1d296ea9c09702c09083ca5272e64d115b687d23"),
         }
     }
 }
