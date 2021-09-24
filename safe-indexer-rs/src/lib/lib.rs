@@ -10,14 +10,15 @@ use dotenv::dotenv;
 use tokio::time::sleep;
 use std::time::Duration;
 use crate::rpc::client::RpcClient;
-use crate::rpc::models::{BlockNumber, Topic};
+use crate::rpc::models::Topic;
 use tokio::try_join;
 
 pub mod config;
 pub mod db;
-pub mod tasks;
-pub mod rpc;
+pub mod loaders;
 pub mod number_utils;
+pub mod rpc;
+pub mod tasks;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -41,10 +42,10 @@ async fn main() -> anyhow::Result<()> {
         }
 
         let (result_incoming_eth, result_exec_success, result_exec_failure, result_multisig_txs) = try_join!(
-            tasks::impls::tx_hashes_for_topic(safe_address, BlockNumber::Value(number_utils::to_hex_string(next_block)?), Topic::IncomingEth),
-            tasks::impls::tx_hashes_for_topic(safe_address, BlockNumber::Value(number_utils::to_hex_string(next_block)?), Topic::ExecutionSuccess),
-            tasks::impls::tx_hashes_for_topic(safe_address, BlockNumber::Value(number_utils::to_hex_string(next_block)?), Topic::ExecutionFailure),
-            tasks::impls::tx_hashes_for_topic(safe_address, BlockNumber::Value(number_utils::to_hex_string(next_block)?), Topic::SafeMultisigTransaction),
+            rpc_client.get_transaction_hashes_for_event(safe_address, next_block, Topic::IncomingEth),
+            rpc_client.get_transaction_hashes_for_event(safe_address, next_block, Topic::ExecutionSuccess),
+            rpc_client.get_transaction_hashes_for_event(safe_address, next_block, Topic::ExecutionFailure),
+            rpc_client.get_transaction_hashes_for_event(safe_address, next_block, Topic::SafeMultisigTransaction),
         )?;
 
         log::info!("========================================================================");

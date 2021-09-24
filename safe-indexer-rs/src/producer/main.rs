@@ -1,7 +1,7 @@
 use anyhow::Result;
 use celery::beat::DeltaSchedule;
 use celery::prelude::*;
-use commons::{config, number_utils, tasks, rpc::models::{BlockNumber, Topic}};
+use commons::{config, tasks, rpc::models::Topic};
 use dotenv::dotenv;
 use tokio::time::Duration;
 
@@ -22,17 +22,17 @@ async fn main() -> Result<()> {
             "INCOMING ETH" => {
                 tasks::celery::tx_hashes_for_topic,
                 schedule = DeltaSchedule::new(Duration::from_secs(15)),
-                args = ("0xd6f5Bef6bb4acD235CF85c0ce196316d10785d67".to_string(), BlockNumber::Value(number_utils::to_hex_string(config::start_block()).expect("Bad block number")), Topic::IncomingEth),
+                args = ("0xd6f5Bef6bb4acD235CF85c0ce196316d10785d67".to_string(), config::start_block(), Topic::IncomingEth),
                 },
             "EXECUTION SUCCESS" => {
                 tasks::celery::tx_hashes_for_topic,
                 schedule = DeltaSchedule::new(Duration::from_secs(15)),
-                args = ("0xd6f5Bef6bb4acD235CF85c0ce196316d10785d67".to_string(), BlockNumber::Value(number_utils::to_hex_string(config::start_block()).expect("Bad block number")), Topic::ExecutionSuccess),
+                args = ("0xd6f5Bef6bb4acD235CF85c0ce196316d10785d67".to_string(), config::start_block(), Topic::ExecutionSuccess),
                 },
             "EXECUTION FAILURE" => {
                 tasks::celery::tx_hashes_for_topic,
                 schedule = DeltaSchedule::new(Duration::from_secs(15)),
-                args = ("0xd6f5Bef6bb4acD235CF85c0ce196316d10785d67".to_string(), BlockNumber::Value(number_utils::to_hex_string(config::start_block()).expect("Bad block number")), Topic::ExecutionFailure),
+                args = ("0xd6f5Bef6bb4acD235CF85c0ce196316d10785d67".to_string(), config::start_block(), Topic::ExecutionFailure),
                 }
         ],
         task_routes = [

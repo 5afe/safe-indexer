@@ -1,5 +1,5 @@
-use crate::rpc::models::{RpcRequest, RpcResponse};
-use crate::config;
+use crate::rpc::models::{RpcRequest, RpcResponse, RpcTransaction, Topic, BlockNumber};
+use crate::{config, number_utils};
 use serde::de::DeserializeOwned;
 
 pub struct RpcClient {
@@ -18,6 +18,13 @@ impl RpcClient {
         let response = self.send_request::<String>(&request).await?;
         let latest_block_number = crate::number_utils::from_hex_string(&response.result)?;
         Ok(latest_block_number)
+    }
+
+    pub async fn get_transaction_hashes_for_event(&self, safe_address: &str, from: u64, topic: Topic) -> anyhow::Result<Vec<String>> {
+        let from = BlockNumber::Value(number_utils::to_hex_string(from)?);
+        let request = RpcRequest::build_get_logs(&safe_address, topic, from);
+        let response = self.send_request::<Vec<RpcTransaction>>(&request).await?;
+        Ok(response.result.iter().map(|result| result.transaction_hash.to_string()).collect())
     }
 
     async fn send_request<T: DeserializeOwned>(&self, rpc_request: &RpcRequest) -> anyhow::Result<RpcResponse<T>> {
