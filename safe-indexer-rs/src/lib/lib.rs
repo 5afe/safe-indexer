@@ -38,12 +38,16 @@ async fn main() -> anyhow::Result<()> {
             continue;
         }
 
-        let result = tasks::impls::check_incoming_eth("0xd6f5Bef6bb4acD235CF85c0ce196316d10785d67", BlockNumber::Value(number_utils::to_hex_string(next_block)?)).await?;
-        log::info!("Starting at block        : {:#?}", start_block);
-        log::info!("Requesting logs for block: {:#?}", &next_block);
-        log::info!("Current block            : {:#?}", &latest_block);
-        log::info!("Block step interval      : {:#?}", &block_tick_interval);
-        log::info!("Incoming eth tx hashes   : {:#?}", result);
+        let result_incoming_eth = tasks::impls::check_incoming_eth("0xd6f5Bef6bb4acD235CF85c0ce196316d10785d67", BlockNumber::Value(number_utils::to_hex_string(next_block)?)).await?;
+        let result_execution_success = tasks::impls::check_execution_success("0xd6f5Bef6bb4acD235CF85c0ce196316d10785d67", BlockNumber::Value(number_utils::to_hex_string(next_block)?)).await?;
+        let result_execution_failure = tasks::impls::check_execution_failure("0xd6f5Bef6bb4acD235CF85c0ce196316d10785d67", BlockNumber::Value(number_utils::to_hex_string(next_block)?)).await?;
+        log::info!("Starting at block            : {:#?}", start_block);
+        log::info!("Requesting logs for block    : {:#?}", &next_block);
+        log::info!("Current block                : {:#?}", &latest_block);
+        log::info!("Block step interval          : {:#?}", &block_tick_interval);
+        log::info!("Incoming eth tx hashes       : {:#?}", result_incoming_eth);
+        log::info!("Incoming exec success hashes : {:#?}", result_execution_success);
+        log::info!("Incoming exec failure hashes : {:#?}", result_execution_failure);
         log::info!("Sleeping for {} milliseconds", &time_tick_interval);
         sleep(Duration::from_millis(time_tick_interval)).await;
 
