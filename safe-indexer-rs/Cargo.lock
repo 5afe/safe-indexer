@@ -1152,6 +1152,7 @@ dependencies = [
  "dotenv",
  "dotenv_codegen",
  "env_logger",
+ "futures",
  "log",
  "reqwest",
  "serde",

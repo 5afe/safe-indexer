@@ -12,6 +12,8 @@ use std::time::Duration;
 use crate::rpc::client::RpcClient;
 use crate::rpc::models::Topic;
 use tokio::try_join;
+use crate::loaders::in_mem_loader::InMemLoader;
+use crate::loaders::EventLoader; // for `try_for_each_concurrent`
 
 pub mod config;
 pub mod db;
@@ -25,7 +27,9 @@ async fn main() -> anyhow::Result<()> {
     dotenv().ok();
     env_logger::init();
 
+    // TODO do not double instantiate the rpc_client
     let rpc_client = RpcClient::new(reqwest::Client::new());
+    let in_memory_loader = InMemLoader::new(RpcClient::new(reqwest::Client::new()));
 
     let start_block = config::start_block();
     let time_tick_interval = config::iteration_sleep_interval();
@@ -48,10 +52,24 @@ async fn main() -> anyhow::Result<()> {
             rpc_client.get_transaction_hashes_for_event(safe_address, next_block, Topic::SafeMultisigTransaction),
         )?;
 
-        let (eth_transactions, success_transaction) = try_join!(
-            rpc_client.get_transaction(result_incoming_eth.first().unwrap()),
-            rpc_client.get_transaction(result_exec_success.first().unwrap()),
-        )?;
+        let all_results = {
+            let mut all_results = vec![];
+            all_results.extend(&result_incoming_eth);
+            all_results.extend(&result_exec_success);
+            all_results.extend(&result_exec_failure);
+            all_results.extend(&result_multisig_txs);
+            all_results
+        };
+
+        let tx_results = {
+            let mut tx_results = vec![];
+            for tx_hash in all_results {
+                if !in_memory_loader.was_tx_hash_checked(&tx_hash).await {
+                    tx_results.push(in_memory_loader.process_tx_hash(&tx_hash).await?);
+                }
+            }
+            tx_results
+        };
 
         log::info!("========================================================================");
         log::info!("Starting at block             : {:#?}", start_block);
@@ -63,8 +81,7 @@ async fn main() -> anyhow::Result<()> {
         log::info!("Execution failure hashes      : {:#?}", result_exec_failure);
         log::info!("Execution Multisig hashes     : {:#?}", result_multisig_txs);
         log::info!("========================================================================");
-        log::info!("Incoming ETH transactions     : {:#?}", eth_transactions);
-        log::info!("Success Multisig transactions : {:#?}", success_transaction);
+        log::info!("New transactions in this loop : {:#?}", tx_results);
         log::info!("Sleeping for {} milliseconds", &time_tick_interval);
         log::info!("========================================================================");
 

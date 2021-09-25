@@ -42,3 +42,4 @@ reqwest = { version = "0.11", features = ["json"] }
 diesel = { version = "1.4.7", features = ["postgres"] }
 
 async-trait = "0.1.51"
+futures = "0.3"

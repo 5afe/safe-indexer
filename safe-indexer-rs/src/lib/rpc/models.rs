@@ -41,7 +41,7 @@ pub struct RpcTransactionLog {
     pub transaction_index: String,
 }
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct RpcTransaction {
     pub block_hash: String,
