@@ -30,7 +30,6 @@ impl RpcClient {
     pub async fn get_transaction(&self, tx_hash: &str) -> anyhow::Result<RpcTransaction> {
         let request = RpcRequest::build_get_transaction_by_hash(tx_hash);
         let response = self.send_request::<RpcTransaction>(&request).await;
-        log::error!("{:#?}", response);
         Ok(response.unwrap().result)
     }
 
