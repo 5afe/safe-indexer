@@ -7,13 +7,10 @@ extern crate log;
 extern crate reqwest;
 
 use dotenv::dotenv;
-use tokio::time::sleep;
-use std::time::Duration;
-use crate::rpc::client::RpcClient;
-use crate::rpc::models::Topic;
-use tokio::try_join;
 use crate::loaders::in_mem_loader::InMemLoader;
-use crate::loaders::EventLoader; // for `try_for_each_concurrent`
+use crate::loaders::EventLooper;
+use crate::loaders::default_event_looper::ConsoleLoggerEventLoop;
+use crate::rpc::client::RpcClient;
 
 pub mod config;
 pub mod db;
@@ -27,65 +24,9 @@ async fn main() -> anyhow::Result<()> {
     dotenv().ok();
     env_logger::init();
 
-    // TODO do not double instantiate the rpc_client
-    let rpc_client = RpcClient::new(reqwest::Client::new());
-    let in_memory_loader = InMemLoader::new(RpcClient::new(reqwest::Client::new()));
-
-    let start_block = config::start_block();
-    let time_tick_interval = config::iteration_sleep_interval();
-    let block_tick_interval = config::block_step();
     let safe_address = "0xd6f5Bef6bb4acD235CF85c0ce196316d10785d67";
+    let in_memory_loader = InMemLoader::new(RpcClient::new(reqwest::Client::new()));
+    let event_console_looper = ConsoleLoggerEventLoop::new();
 
-    let mut next_block = start_block;
-    loop {
-        let latest_block = rpc_client.get_current_block().await?;
-        if next_block >= latest_block {
-            log::debug!("Finished the block chain, waiting for 10 seconds");
-            sleep(Duration::from_millis(10000)).await;
-            continue;
-        }
-
-        let (result_incoming_eth, result_exec_success, result_exec_failure, result_multisig_txs) = try_join!(
-            rpc_client.get_transaction_hashes_for_event(safe_address, next_block, Topic::IncomingEth),
-            rpc_client.get_transaction_hashes_for_event(safe_address, next_block, Topic::ExecutionSuccess),
-            rpc_client.get_transaction_hashes_for_event(safe_address, next_block, Topic::ExecutionFailure),
-            rpc_client.get_transaction_hashes_for_event(safe_address, next_block, Topic::SafeMultisigTransaction),
-        )?;
-
-        let all_results = {
-            let mut all_results = vec![];
-            all_results.extend(&result_incoming_eth);
-            all_results.extend(&result_exec_success);
-            all_results.extend(&result_exec_failure);
-            all_results.extend(&result_multisig_txs);
-            all_results
-        };
-
-        let tx_results = {
-            let mut tx_results = vec![];
-            for tx_hash in all_results {
-                if !in_memory_loader.was_tx_hash_checked(&tx_hash).await {
-                    tx_results.push(in_memory_loader.process_tx_hash(&tx_hash).await?);
-                }
-            }
-            tx_results
-        };
-
-        log::info!("========================================================================");
-        log::info!("Starting at block             : {:#?}", start_block);
-        log::info!("Requesting logs for block     : {:#?}", &next_block);
-        log::info!("Current block                 : {:#?}", &latest_block);
-        log::info!("Block step interval           : {:#?}", &block_tick_interval);
-        log::info!("Incoming eth tx hashes        : {:#?}", result_incoming_eth);
-        log::info!("Execution success hashes      : {:#?}", result_exec_success);
-        log::info!("Execution failure hashes      : {:#?}", result_exec_failure);
-        log::info!("Execution Multisig hashes     : {:#?}", result_multisig_txs);
-        log::info!("========================================================================");
-        log::info!("New transactions in this loop : {:#?}", tx_results);
-        log::info!("Sleeping for {} milliseconds", &time_tick_interval);
-        log::info!("========================================================================");
-
-        sleep(Duration::from_millis(time_tick_interval)).await;
-        next_block += block_tick_interval;
-    }
+    event_console_looper.start(safe_address, &in_memory_loader).await
 }

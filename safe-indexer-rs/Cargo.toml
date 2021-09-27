@@ -3,6 +3,7 @@ name = "safe-indexer-rs"
 version = "0.1.0"
 authors = ["Jose Alvarez <jose.alvarez@gnosis.pm>"]
 edition = "2018"
+default-run = "looper"
 
 [lib]
 name = "commons"
