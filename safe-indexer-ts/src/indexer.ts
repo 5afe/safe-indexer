@@ -80,12 +80,12 @@ export class SafeIndexer {
         }
     }
 
-    private getCurrentBlockInterval(earliestBlock: number, latestBlock: number): { fromBlock: number, toBlock: number } | undefined {
+    private getCurrentBlockInterval(earliestBlock: number, latestBlock: number, reverse?: boolean): { fromBlock: number, toBlock: number } | undefined {
         console.log(this.state)
         const earliestIndexedBlock = this.state.earliestIndexedBlock
         const lastIndexedBlock = this.state.lastIndexedBlock
         const maxBlocks = this.config.maxBlocks
-        if (this.config.reverse) {
+        if (reverse !== undefined ? reverse : this.config.reverse) {
             if (earliestBlock >= earliestIndexedBlock) {
                 return
             }
@@ -116,7 +116,7 @@ export class SafeIndexer {
         }
     }
 
-    async start() {
+    async start(reverse?: boolean) {
         const activeChainId = await this.loader.loadChainId()
         if (this.config.chainId && activeChainId != this.config.chainId) {
             const errorMsg = `Wrong chain! Expected ${this.config.chainId} got ${activeChainId}`
@@ -133,7 +133,7 @@ export class SafeIndexer {
             const latestBlock = await this.loader.loadCurrentBlock()
             this.ensureBlockDefaults(latestBlock);
             const earliestBlock = this.config.earliestBlock;
-            const blockInterval = this.getCurrentBlockInterval(earliestBlock, latestBlock)
+            const blockInterval = this.getCurrentBlockInterval(earliestBlock, latestBlock, reverse)
             if (!blockInterval) {
                 this.config.logger?.log("Up to date with current block!")
                 this.postStatusUpdate({ type: "up_to_date", latestBlock, earliestBlock });
