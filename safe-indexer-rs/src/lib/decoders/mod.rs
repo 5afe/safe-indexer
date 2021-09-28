@@ -2,7 +2,7 @@ pub mod http_decoder;
 pub mod models;
 
 use async_trait::async_trait;
-use crate::decoder::models::DataDecoded;
+use crate::decoders::models::DataDecoded;
 
 // Ideally we can swap out our services eventually in favour of eth-contracts-rs
 // For now the quickest way to a have dataDecoded is to rely in safe infra

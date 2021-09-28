@@ -13,7 +13,7 @@ use crate::loaders::EventLooper;
 use crate::loaders::in_mem_loader::InMemLoader;
 use crate::rpc::client::RpcClient;
 
-pub mod decoder;
+pub mod decoders;
 pub mod config;
 pub mod db;
 pub mod loaders;

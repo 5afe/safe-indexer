@@ -5,8 +5,8 @@ use std::time::Duration;
 use crate::rpc::models::Topic;
 use tokio::try_join;
 use crate::config;
-use crate::decoder::http_decoder::HttpDataDecoder;
-use crate::decoder::EthDataDecoder;
+use crate::decoders::http_decoder::HttpDataDecoder;
+use crate::decoders::EthDataDecoder;
 use crate::utils::number_utils::to_decimal;
 
 pub struct ConsoleLoggerEventLoop {

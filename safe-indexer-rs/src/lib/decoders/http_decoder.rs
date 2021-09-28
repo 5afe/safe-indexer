@@ -1,5 +1,5 @@
-use crate::decoder::EthDataDecoder;
-use crate::decoder::models::DataDecoded;
+use crate::decoders::EthDataDecoder;
+use crate::decoders::models::DataDecoded;
 use std::collections::HashMap;
 use async_trait::async_trait;
 
