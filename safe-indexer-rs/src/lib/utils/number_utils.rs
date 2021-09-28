@@ -8,3 +8,8 @@ pub fn from_hex_string(input: &str) -> Result<u64> {
     let result = &input[2..input.len()];
     Ok(u64::from_str_radix(&result, 16)?)
 }
+
+pub fn to_decimal(input: &str) -> Result<String> {
+    let decimal = from_hex_string(input)?;
+    Ok(decimal.to_string())
+}

@@ -5,11 +5,15 @@ use std::time::Duration;
 use crate::rpc::models::Topic;
 use tokio::try_join;
 use crate::config;
+use crate::decoder::http_decoder::HttpDataDecoder;
+use crate::decoder::EthDataDecoder;
+use crate::utils::number_utils::to_decimal;
 
 pub struct ConsoleLoggerEventLoop {
     start_block: u64,
     sleep_between_ticks_ms: u64,
     block_step: u64,
+    http_data_decoder: HttpDataDecoder,
 }
 
 impl ConsoleLoggerEventLoop {
@@ -18,6 +22,7 @@ impl ConsoleLoggerEventLoop {
             start_block: config::start_block(),
             sleep_between_ticks_ms: config::iteration_sleep_interval(),
             block_step: config::block_step(),
+            http_data_decoder: HttpDataDecoder::new(),
         }
     }
 }
@@ -54,7 +59,15 @@ impl EventLooper for ConsoleLoggerEventLoop {
                 let mut tx_results = vec![];
                 for tx_hash in all_results {
                     if !event_loader.was_tx_hash_checked(&tx_hash).await {
-                        tx_results.push(event_loader.process_tx_hash(&tx_hash).await?);
+                        let rpc_tx = event_loader.process_tx_hash(&tx_hash).await?;
+                        let chain_id = to_decimal(&rpc_tx.chain_id)?;
+                        let data = &rpc_tx.input;
+
+                        if self.http_data_decoder.can_decode(data) {
+                            let data_decoded = self.http_data_decoder.decode(&chain_id, &rpc_tx.input).await?;
+                            tx_results.push(data_decoded);
+                        }
+                        // tx_results.push(event_loader.process_tx_hash(&tx_hash).await?);
                     }
                 }
                 tx_results
