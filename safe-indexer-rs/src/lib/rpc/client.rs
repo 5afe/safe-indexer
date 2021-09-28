@@ -1,6 +1,8 @@
-use crate::rpc::models::{RpcRequest, RpcResponse, RpcTransactionLog, Topic, BlockNumber, RpcTransaction};
-use crate::{config, number_utils};
 use serde::de::DeserializeOwned;
+
+use crate::config;
+use crate::rpc::models::{BlockNumber, RpcRequest, RpcResponse, RpcTransaction, RpcTransactionLog, Topic};
+use crate::utils::number_utils;
 
 pub struct RpcClient {
     http_client: reqwest::Client,
@@ -16,7 +18,7 @@ impl RpcClient {
     pub async fn get_current_block(&self) -> anyhow::Result<u64> {
         let request = RpcRequest::build_get_current_block();
         let response = self.send_request::<String>(&request).await?;
-        let latest_block_number = crate::number_utils::from_hex_string(&response.result)?;
+        let latest_block_number = crate::utils::number_utils::from_hex_string(&response.result)?;
         Ok(latest_block_number)
     }
 

@@ -7,15 +7,17 @@ extern crate log;
 extern crate reqwest;
 
 use dotenv::dotenv;
-use crate::loaders::in_mem_loader::InMemLoader;
-use crate::loaders::EventLooper;
+
 use crate::loaders::default_event_looper::ConsoleLoggerEventLoop;
+use crate::loaders::EventLooper;
+use crate::loaders::in_mem_loader::InMemLoader;
 use crate::rpc::client::RpcClient;
 
+pub mod decoder;
 pub mod config;
 pub mod db;
 pub mod loaders;
-pub mod number_utils;
+pub mod utils;
 pub mod rpc;
 pub mod tasks;
 
