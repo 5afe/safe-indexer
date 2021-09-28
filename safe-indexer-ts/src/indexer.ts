@@ -11,18 +11,43 @@ export interface Logger {
     error(message?: any, ...optionalParams: any[]): void;
 }
 
-export interface SafeIndexerConfig {
+export interface SafeIndexerUserConfig {
     safe?: string,
     chainId?: number,
     maxBlocks?: number,
     logger?: Logger,
     upToDateTimeout?: number,
     syncTimeout?: number,
+    earliestBlock?: number,
+    reverse?: boolean
+}
+
+export interface SafeIndexerUserConfigUpdate {
+    maxBlocks?: number,
+    logger?: Logger,
+    upToDateTimeout?: number,
+    syncTimeout?: number,
+    earliestBlock?: number,
+    reverse?: boolean
+}
+
+export interface SafeIndexerConfig {
+    safe?: string,
+    chainId?: number,
+    maxBlocks: number,
+    logger?: Logger,
+    earliestBlock: number,
+    upToDateTimeout: number,
+    syncTimeout: number,
+    reverse: boolean
 }
 
 const configDefaults = {
+    earliestBlock: 0,
     maxBlocks: 100,
-    upToDateTimeout: 10000
+    upToDateTimeout: 10000,
+    syncTimeout: 100,
+    reverse: false
 }
 
 export class SafeIndexer {
@@ -35,16 +60,19 @@ export class SafeIndexer {
     paused: boolean = false;
     config: SafeIndexerConfig;
 
-    constructor(state: State, loader: Loader, parser: Parser, callback: Callback, config?: SafeIndexerConfig) {
+    constructor(state: State, loader: Loader, parser: Parser, callback: Callback, config?: SafeIndexerUserConfig) {
         this.state = state;
         this.loader = loader;
         this.parser = parser;
         this.callback = callback;
         this.config = { ...configDefaults, ...config };
-        console.log(this.config)
     }
 
-    postStatusUpdate(status: IndexerStatus) {
+    updateConfig(update: SafeIndexerUserConfigUpdate) {
+        this.config = { ...this.config, ...update };
+    }
+
+    private postStatusUpdate(status: IndexerStatus) {
         try {
             this.callback?.onStatusUpdate?.(status)
         } catch (e) {
@@ -52,7 +80,43 @@ export class SafeIndexer {
         }
     }
 
-    async start(reverse?: boolean) {
+    private getCurrentBlockInterval(earliestBlock: number, latestBlock: number): { fromBlock: number, toBlock: number } | undefined {
+        console.log(this.state)
+        const earliestIndexedBlock = this.state.earliestIndexedBlock
+        const lastIndexedBlock = this.state.lastIndexedBlock
+        const maxBlocks = this.config.maxBlocks
+        if (this.config.reverse) {
+            if (earliestBlock >= earliestIndexedBlock) {
+                return
+            }
+            return {
+                fromBlock: Math.max(earliestBlock, earliestIndexedBlock - maxBlocks),
+                toBlock: earliestIndexedBlock - 1
+            }
+        } else {
+            if (latestBlock <= lastIndexedBlock) {
+                return
+            }
+            return {
+                fromBlock: lastIndexedBlock + 1,
+                toBlock: Math.min(latestBlock, lastIndexedBlock + maxBlocks)
+            }
+        }
+    }
+
+    private ensureBlockDefaults(latestBlock: number) {
+        if (this.config.earliestBlock < 0) {
+            this.config.earliestBlock = latestBlock
+        }
+        if (this.state.earliestIndexedBlock < 0) {
+            this.state.earliestIndexedBlock = this.config.earliestBlock + 1
+        }
+        if (this.state.lastIndexedBlock < 0) {
+            this.state.lastIndexedBlock = latestBlock - 1
+        }
+    }
+
+    async start() {
         const activeChainId = await this.loader.loadChainId()
         if (this.config.chainId && activeChainId != this.config.chainId) {
             const errorMsg = `Wrong chain! Expected ${this.config.chainId} got ${activeChainId}`
@@ -63,26 +127,22 @@ export class SafeIndexer {
         this.indexing = true;
         while(this.indexing) {
             if (this.paused) {
-                await sleep(this.config.syncTimeout || 100)
+                await sleep(this.config.syncTimeout)
                 continue
             }
             const latestBlock = await this.loader.loadCurrentBlock()
-            let fromBlock;
-            let toBlock;
-            if (reverse) {
-                fromBlock = this.state.lastIndexedBlock + 1
-                toBlock = Math.min(latestBlock, this.state.lastIndexedBlock + (this.config.maxBlocks || 100))
-            } else {
-                if (latestBlock <= this.state.lastIndexedBlock) {
-                    this.config.logger?.log("Up to date with current block!")
-                    this.postStatusUpdate({ type: "up_to_date", latestBlock });
-                    await conditionalSleep(this.config.upToDateTimeout)
-                    continue
-                }
-                fromBlock = this.state.lastIndexedBlock + 1
-                toBlock = Math.min(latestBlock, this.state.lastIndexedBlock + (this.config.maxBlocks || 100))
+            this.ensureBlockDefaults(latestBlock);
+            const earliestBlock = this.config.earliestBlock;
+            const blockInterval = this.getCurrentBlockInterval(earliestBlock, latestBlock)
+            if (!blockInterval) {
+                this.config.logger?.log("Up to date with current block!")
+                this.postStatusUpdate({ type: "up_to_date", latestBlock, earliestBlock });
+                await conditionalSleep(this.config.upToDateTimeout)
+                continue
             }
-            this.postStatusUpdate({ type: "processing", fromBlock, toBlock, latestBlock });
+            const { fromBlock, toBlock } = blockInterval;
+            
+            this.postStatusUpdate({ type: "processing", fromBlock, toBlock, latestBlock, earliestBlock });
             this.config.logger?.log("Process from block", fromBlock, "to block", toBlock)
             try {
                 await this.processBlocks(fromBlock, toBlock)
