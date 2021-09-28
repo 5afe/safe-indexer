@@ -109,7 +109,7 @@ export class SafeIndexer {
             this.config.earliestBlock = latestBlock
         }
         if (this.state.earliestIndexedBlock < 0) {
-            this.state.earliestIndexedBlock = this.config.earliestBlock + 1
+            this.state.earliestIndexedBlock = latestBlock + 1
         }
         if (this.state.lastIndexedBlock < 0) {
             this.state.lastIndexedBlock = latestBlock - 1
