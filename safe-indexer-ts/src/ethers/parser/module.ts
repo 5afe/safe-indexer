@@ -48,6 +48,7 @@ export class ModuleDecoder implements EventDecoder {
         const txMeta: ModuleTx = {
             type: "module_transaction",
             id,
+            block: block.number,
             timestamp: block.timestamp,
             logs: await mapEvents(parentDecoder, subLogs),
             txHash: event.transactionHash,

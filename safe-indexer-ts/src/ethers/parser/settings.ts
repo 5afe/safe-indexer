@@ -93,6 +93,7 @@ export class SettingsDecoder implements EventDecoder {
         return {
             type: "settings",
             id: "settings_" + event.transactionHash + "_" + event.eventId,
+            block: block.number,
             timestamp: block.timestamp,
             txHash: event.transactionHash,
             ...details
@@ -106,6 +107,7 @@ export class SettingsDecoder implements EventDecoder {
                 return {
                     type: "setup",
                     id: "setup_" + event.transactionHash + "_" + event.eventId,
+                    block: block.number,
                     timestamp: block.timestamp,
                     txHash: event.transactionHash,
                 }

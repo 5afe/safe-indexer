@@ -48,6 +48,7 @@ export class TransferDecoder implements EventDecoder {
         return {
             type: "transfer",
             id,
+            block: block.number,
             txHash: event.transactionHash,
             timestamp: block.timestamp,
             sender: eventParams.from,

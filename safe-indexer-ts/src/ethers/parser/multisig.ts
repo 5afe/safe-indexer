@@ -130,6 +130,7 @@ export class MultisigDecoder implements EventDecoder {
         const txMeta: MultisigTx = {
             type: "multisig_transaction",
             id,
+            block: block.number,
             timestamp: block.timestamp,
             logs: await mapEvents(parentDecoder, subLogs),
             txHash: event.transactionHash,

@@ -3,6 +3,7 @@ import { Event } from "./ethereum"
 
 interface Base {
     id: string,
+    block: number,
     timestamp: number,
 }
 
