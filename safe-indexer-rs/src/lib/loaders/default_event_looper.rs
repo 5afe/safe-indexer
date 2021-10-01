@@ -1,5 +1,6 @@
 use crate::config;
-use crate::decoders::http_decoder::HttpDataDecoder;
+use crate::decoders::http::decoder::HttpDataDecoder;
+use crate::decoders::http::models::HttpDecoderInput;
 use crate::decoders::EthDataDecoder;
 use crate::loaders::{EventLoader, EventLooper};
 use crate::rpc::models::Topic;
@@ -74,14 +75,12 @@ impl EventLooper for ConsoleLoggerEventLoop {
                 for tx_hash in all_results {
                     if !event_loader.was_tx_hash_checked(&tx_hash).await {
                         let rpc_tx = event_loader.process_tx_hash(&tx_hash).await?;
-                        let chain_id = to_decimal(&rpc_tx.chain_id)?;
-                        let data = &rpc_tx.input;
-
-                        if self.http_data_decoder.can_decode(data) {
-                            let data_decoded = self
-                                .http_data_decoder
-                                .decode(&chain_id, &rpc_tx.input)
-                                .await?;
+                        let decoder_input = HttpDecoderInput {
+                            chain_id: to_decimal(&rpc_tx.chain_id)?,
+                            data: rpc_tx.input.to_string(),
+                        };
+                        if self.http_data_decoder.can_decode(&decoder_input) {
+                            let data_decoded = self.http_data_decoder.decode(decoder_input).await?;
                             tx_results.push(data_decoded);
                         }
                         // tx_results.push(event_loader.process_tx_hash(&tx_hash).await?);

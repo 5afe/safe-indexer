@@ -1,4 +1,4 @@
-use crate::decoders::models::DataDecoded;
+use crate::decoders::http::models::{DataDecoded, HttpDecoderInput};
 use crate::decoders::EthDataDecoder;
 use async_trait::async_trait;
 use std::collections::HashMap;
@@ -18,15 +18,16 @@ impl HttpDataDecoder {
 #[async_trait]
 impl EthDataDecoder for HttpDataDecoder {
     type DecodedOutput = DataDecoded;
+    type DecoderInput = HttpDecoderInput;
 
-    async fn decode(&self, chain_id: &str, data: &str) -> anyhow::Result<Self::DecodedOutput> {
+    async fn decode(&self, input: HttpDecoderInput) -> anyhow::Result<Self::DecodedOutput> {
         let url = format!(
             "https://safe-client.gnosis.io/v1/chains/{}/data-decoder",
-            chain_id
+            input.chain_id
         );
         let mut params = HashMap::new();
 
-        params.insert("data", data);
+        params.insert("data", &input.data);
         let response = self.http_client.post(url).json(&params).send().await?;
 
         Ok(serde_json::from_str::<DataDecoded>(
@@ -34,7 +35,7 @@ impl EthDataDecoder for HttpDataDecoder {
         )?)
     }
 
-    fn can_decode(&self, data: &str) -> bool {
-        !data.is_empty() && data != "0x"
+    fn can_decode(&self, data: &HttpDecoderInput) -> bool {
+        !data.data.is_empty() && data.data != "0x"
     }
 }

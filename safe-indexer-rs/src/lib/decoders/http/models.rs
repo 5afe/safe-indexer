@@ -2,11 +2,9 @@ use crate::utils::json;
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
-#[derive(Serialize_repr, Deserialize_repr, PartialEq, Debug)]
-#[repr(u8)]
-pub enum Operation {
-    CALL = 0,
-    DELEGATE = 1,
+pub struct HttpDecoderInput {
+    pub chain_id: String,
+    pub data: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -14,6 +12,13 @@ pub enum Operation {
 pub struct DataDecoded {
     pub method: String,
     pub parameters: Option<Vec<Parameter>>,
+}
+
+#[derive(Serialize_repr, Deserialize_repr, PartialEq, Debug)]
+#[repr(u8)]
+pub enum Operation {
+    CALL = 0,
+    DELEGATE = 1,
 }
 
 #[derive(Serialize, Deserialize, Debug)]

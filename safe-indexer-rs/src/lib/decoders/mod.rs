@@ -1,6 +1,5 @@
-pub mod http_decoder;
-pub mod models;
-pub mod topic_decoder;
+pub mod http;
+pub mod topic;
 
 use async_trait::async_trait;
 
@@ -9,8 +8,9 @@ use async_trait::async_trait;
 #[async_trait]
 pub trait EthDataDecoder {
     type DecodedOutput;
+    type DecoderInput;
 
-    async fn decode(&self, chain_id: &str, data: &str) -> anyhow::Result<Self::DecodedOutput>;
+    async fn decode(&self, input: Self::DecoderInput) -> anyhow::Result<Self::DecodedOutput>;
 
-    fn can_decode(&self, data: &str) -> bool;
+    fn can_decode(&self, data: &Self::DecoderInput) -> bool;
 }
