@@ -12,6 +12,4 @@ Additionally, we have only a single `Requester` worker that handles issued reque
 
 ```
  $ iex -S mix // interactive mode
- $ mix escript.build // builds projects as script
- $ ./safe-indexer // runs script
 ```
