@@ -1,5 +1,6 @@
 pub mod http_decoder;
 pub mod models;
+pub mod topic_decoder;
 
 use async_trait::async_trait;
 
@@ -13,4 +14,3 @@ pub trait EthDataDecoder {
 
     fn can_decode(&self, data: &str) -> bool;
 }
-

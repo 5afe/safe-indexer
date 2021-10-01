@@ -1,9 +1,9 @@
-use tokio::sync::Mutex;
-use crate::rpc::models::{RpcTransaction, Topic};
 use crate::loaders::EventLoader;
-use std::collections::HashMap;
 use crate::rpc::client::RpcClient;
+use crate::rpc::models::{RpcTransaction, Topic};
 use async_trait::async_trait;
+use std::collections::HashMap;
+use tokio::sync::Mutex;
 
 pub struct InMemLoader {
     rpc_client: RpcClient,
@@ -12,14 +12,24 @@ pub struct InMemLoader {
 
 impl InMemLoader {
     pub fn new(rpc_client: RpcClient) -> Self {
-        InMemLoader { rpc_client, database: Default::default() }
+        InMemLoader {
+            rpc_client,
+            database: Default::default(),
+        }
     }
 }
 
 #[async_trait]
 impl EventLoader for InMemLoader {
-    async fn get_transaction_hashes_for_event(&self, safe_address: &str, from: u64, topic: Topic) -> anyhow::Result<Vec<String>> {
-        self.rpc_client.get_transaction_hashes_for_event(safe_address, from, topic).await
+    async fn get_transaction_hashes_for_event(
+        &self,
+        safe_address: &str,
+        from: u64,
+        topic: Topic,
+    ) -> anyhow::Result<Vec<String>> {
+        self.rpc_client
+            .get_transaction_hashes_for_event(safe_address, from, topic)
+            .await
     }
 
     async fn was_tx_hash_checked(&self, tx_hash: &str) -> bool {

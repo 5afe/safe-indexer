@@ -1,12 +1,17 @@
-use async_trait::async_trait;
 use crate::rpc::models::{RpcTransaction, Topic};
+use async_trait::async_trait;
 
-pub mod in_mem_loader;
 pub mod default_event_looper;
+pub mod in_mem_loader;
 
 #[async_trait]
 pub trait EventLoader {
-    async fn get_transaction_hashes_for_event(&self, safe_address: &str, from: u64, topic: Topic) -> anyhow::Result<Vec<String>>;
+    async fn get_transaction_hashes_for_event(
+        &self,
+        safe_address: &str,
+        from: u64,
+        topic: Topic,
+    ) -> anyhow::Result<Vec<String>>;
 
     async fn was_tx_hash_checked(&self, tx_hash: &str) -> bool;
 
@@ -17,5 +22,9 @@ pub trait EventLoader {
 
 #[async_trait]
 pub trait EventLooper {
-    async fn start(&self, safe_address: &str, event_loader: &(impl EventLoader + Sync)) -> anyhow::Result<()>;
+    async fn start(
+        &self,
+        safe_address: &str,
+        event_loader: &(impl EventLoader + Sync),
+    ) -> anyhow::Result<()>;
 }

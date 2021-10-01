@@ -1,7 +1,7 @@
 use anyhow::Result;
 use celery::beat::DeltaSchedule;
 use celery::prelude::*;
-use commons::{config, tasks, rpc::models::Topic};
+use commons::{config, rpc::models::Topic, tasks};
 use dotenv::dotenv;
 use tokio::time::Duration;
 

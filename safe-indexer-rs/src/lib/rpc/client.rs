@@ -1,7 +1,9 @@
 use serde::de::DeserializeOwned;
 
 use crate::config;
-use crate::rpc::models::{BlockNumber, RpcRequest, RpcResponse, RpcTransaction, RpcTransactionLog, Topic};
+use crate::rpc::models::{
+    BlockNumber, RpcRequest, RpcResponse, RpcTransaction, RpcTransactionLog, Topic,
+};
 use crate::utils::number_utils;
 
 pub struct RpcClient {
@@ -10,9 +12,7 @@ pub struct RpcClient {
 
 impl RpcClient {
     pub fn new(http_client: reqwest::Client) -> Self {
-        RpcClient {
-            http_client
-        }
+        RpcClient { http_client }
     }
 
     pub async fn get_current_block(&self) -> anyhow::Result<u64> {
@@ -22,11 +22,22 @@ impl RpcClient {
         Ok(latest_block_number)
     }
 
-    pub async fn get_transaction_hashes_for_event(&self, safe_address: &str, from: u64, topic: Topic) -> anyhow::Result<Vec<String>> {
+    pub async fn get_transaction_hashes_for_event(
+        &self,
+        safe_address: &str,
+        from: u64,
+        topic: Topic,
+    ) -> anyhow::Result<Vec<String>> {
         let from = BlockNumber::Value(number_utils::to_hex_string(from)?);
         let request = RpcRequest::build_get_logs(&safe_address, topic, from);
-        let response = self.send_request::<Vec<RpcTransactionLog>>(&request).await?;
-        Ok(response.result.iter().map(|result| result.transaction_hash.to_string()).collect())
+        let response = self
+            .send_request::<Vec<RpcTransactionLog>>(&request)
+            .await?;
+        Ok(response
+            .result
+            .iter()
+            .map(|result| result.transaction_hash.to_string())
+            .collect())
     }
 
     pub async fn get_transaction(&self, tx_hash: &str) -> anyhow::Result<RpcTransaction> {
@@ -35,8 +46,13 @@ impl RpcClient {
         Ok(response.unwrap().result)
     }
 
-    async fn send_request<T: DeserializeOwned>(&self, rpc_request: &RpcRequest) -> anyhow::Result<RpcResponse<T>> {
-        let body = self.http_client.post(config::node_uri())
+    async fn send_request<T: DeserializeOwned>(
+        &self,
+        rpc_request: &RpcRequest,
+    ) -> anyhow::Result<RpcResponse<T>> {
+        let body = self
+            .http_client
+            .post(config::node_uri())
             .json(rpc_request)
             .send()
             .await?

@@ -1,12 +1,12 @@
 extern crate celery;
 extern crate celery_codegen;
-extern crate log;
 extern crate dotenv;
+extern crate log;
 
-use celery::prelude::*;
 use anyhow::Result;
-use dotenv::dotenv;
+use celery::prelude::*;
 use commons::{config, tasks};
+use dotenv::dotenv;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -21,7 +21,8 @@ async fn main() -> Result<()> {
         task_routes = [
             "*" => "celery"
         ],
-    ).await?;
+    )
+    .await?;
 
     my_app.display_pretty().await;
     my_app.consume_from(&["celery"]).await?;

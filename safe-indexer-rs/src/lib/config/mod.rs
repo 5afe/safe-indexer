@@ -21,7 +21,10 @@ pub fn block_step() -> u64 {
     env_with_default("BLOCK_STEP", 1000)
 }
 
-fn env_with_default<T: FromStr>(key: &str, default: T) -> T where <T as FromStr>::Err: std::fmt::Debug {
+fn env_with_default<T: FromStr>(key: &str, default: T) -> T
+where
+    <T as FromStr>::Err: std::fmt::Debug,
+{
     match env::var(key) {
         Ok(value) => value.parse().unwrap(),
         Err(_) => default,

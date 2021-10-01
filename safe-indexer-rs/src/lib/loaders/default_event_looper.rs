@@ -1,13 +1,13 @@
-use async_trait::async_trait;
-use crate::loaders::{EventLooper, EventLoader};
-use tokio::time::sleep;
-use std::time::Duration;
-use crate::rpc::models::Topic;
-use tokio::try_join;
 use crate::config;
 use crate::decoders::http_decoder::HttpDataDecoder;
 use crate::decoders::EthDataDecoder;
+use crate::loaders::{EventLoader, EventLooper};
+use crate::rpc::models::Topic;
 use crate::utils::number_utils::to_decimal;
+use async_trait::async_trait;
+use std::time::Duration;
+use tokio::time::sleep;
+use tokio::try_join;
 
 pub struct ConsoleLoggerEventLoop {
     start_block: u64,
@@ -29,7 +29,11 @@ impl ConsoleLoggerEventLoop {
 
 #[async_trait]
 impl EventLooper for ConsoleLoggerEventLoop {
-    async fn start(&self, safe_address: &str, event_loader: &(impl EventLoader + Sync)) -> anyhow::Result<()> {
+    async fn start(
+        &self,
+        safe_address: &str,
+        event_loader: &(impl EventLoader + Sync),
+    ) -> anyhow::Result<()> {
         let mut next_block = self.start_block;
         loop {
             let latest_block = event_loader.last_available_block().await?;
@@ -40,10 +44,22 @@ impl EventLooper for ConsoleLoggerEventLoop {
             }
 
             let (result_exec_success, result_exec_failure, result_multisig_txs) = try_join!(
-            event_loader.get_transaction_hashes_for_event(safe_address, next_block, Topic::ExecutionSuccess),
-            event_loader.get_transaction_hashes_for_event(safe_address, next_block, Topic::ExecutionFailure),
-            event_loader.get_transaction_hashes_for_event(safe_address, next_block, Topic::SafeMultisigTransaction),
-        )?;
+                event_loader.get_transaction_hashes_for_event(
+                    safe_address,
+                    next_block,
+                    Topic::ExecutionSuccess
+                ),
+                event_loader.get_transaction_hashes_for_event(
+                    safe_address,
+                    next_block,
+                    Topic::ExecutionFailure
+                ),
+                event_loader.get_transaction_hashes_for_event(
+                    safe_address,
+                    next_block,
+                    Topic::SafeMultisigTransaction
+                ),
+            )?;
 
             let all_results = {
                 let mut all_results = vec![];
@@ -62,7 +78,10 @@ impl EventLooper for ConsoleLoggerEventLoop {
                         let data = &rpc_tx.input;
 
                         if self.http_data_decoder.can_decode(data) {
-                            let data_decoded = self.http_data_decoder.decode(&chain_id, &rpc_tx.input).await?;
+                            let data_decoded = self
+                                .http_data_decoder
+                                .decode(&chain_id, &rpc_tx.input)
+                                .await?;
                             tx_results.push(data_decoded);
                         }
                         // tx_results.push(event_loader.process_tx_hash(&tx_hash).await?);
