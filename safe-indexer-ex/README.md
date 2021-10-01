@@ -1,21 +1,17 @@
 # SafeIndexer
 
-**TODO: Add description**
+`RequestScheduler` is a dumb scheduler issuing the worker `Requester` every one second to do something. 
 
-## Installation
+The current implementation is synchronous (meaning we need to handle a process response) because we use `GenServer.call`. If we want to switch over to an asynchronous implementation we should use `GenServer.cast` however, back-pressure and backing off should be considered to not overwhelm the `Requester`
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `safe_indexer` to your list of dependencies in `mix.exs`:
+https://hexdocs.pm/elixir/1.12/GenServer.html
 
-```elixir
-def deps do
-  [
-    {:safe_indexer, "~> 0.1.0"}
-  ]
-end
+Additionally, we have only a single `Requester` worker that handles issued requests for work from our `RequestScheduler`. We should use [Poolboy](https://elixirschool.com/en/lessons/misc/poolboy/) to make a pool of workers available to our scheduler.
+
+## Run
+
 ```
-
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/safe_indexer](https://hexdocs.pm/safe_indexer).
-
+ $ iex -S mix // interactive mode
+ $ mix escript.build // builds projects as script
+ $ ./safe-indexer // runs script
+```
