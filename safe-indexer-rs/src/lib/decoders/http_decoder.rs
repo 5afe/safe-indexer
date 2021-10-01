@@ -15,7 +15,9 @@ impl HttpDataDecoder {
 
 #[async_trait]
 impl EthDataDecoder for HttpDataDecoder {
-    async fn decode(&self, chain_id: &str, data: &str) -> anyhow::Result<DataDecoded> {
+    type DecodedOutput = DataDecoded; 
+
+    async fn decode(&self, chain_id: &str, data: &str) -> anyhow::Result<Self::DecodedOutput> {
         let url = format!("https://safe-client.gnosis.io/v1/chains/{}/data-decoder", chain_id);
         let mut params = HashMap::new();
 

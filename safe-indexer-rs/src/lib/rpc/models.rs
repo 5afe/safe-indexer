@@ -44,6 +44,7 @@ pub struct RpcTransactionLog {
 #[derive(Deserialize, Serialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct RpcTransaction {
+    pub to: String, // is the safe itself ?
     pub block_hash: String,
     pub block_number: String,
     pub chain_id: String,
@@ -51,7 +52,7 @@ pub struct RpcTransaction {
     pub gas: String,
     pub gas_price: String,
     pub hash: String,
-    pub input: String,
+    pub input: String, // data field, is this an `execTransaction` call, check 4 bytes
     pub nonce: String,
     pub transaction_index: String,
     pub value: String,

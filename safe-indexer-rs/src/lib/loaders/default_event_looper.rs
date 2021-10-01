@@ -39,8 +39,7 @@ impl EventLooper for ConsoleLoggerEventLoop {
                 continue;
             }
 
-            let (result_incoming_eth, result_exec_success, result_exec_failure, result_multisig_txs) = try_join!(
-            event_loader.get_transaction_hashes_for_event(safe_address, next_block, Topic::IncomingEth),
+            let (result_exec_success, result_exec_failure, result_multisig_txs) = try_join!(
             event_loader.get_transaction_hashes_for_event(safe_address, next_block, Topic::ExecutionSuccess),
             event_loader.get_transaction_hashes_for_event(safe_address, next_block, Topic::ExecutionFailure),
             event_loader.get_transaction_hashes_for_event(safe_address, next_block, Topic::SafeMultisigTransaction),
@@ -48,7 +47,6 @@ impl EventLooper for ConsoleLoggerEventLoop {
 
             let all_results = {
                 let mut all_results = vec![];
-                all_results.extend(&result_incoming_eth);
                 all_results.extend(&result_exec_success);
                 all_results.extend(&result_exec_failure);
                 all_results.extend(&result_multisig_txs);
@@ -78,7 +76,6 @@ impl EventLooper for ConsoleLoggerEventLoop {
             log::info!("Requesting logs for block     : {:#?}", &next_block);
             log::info!("Current block                 : {:#?}", &latest_block);
             log::info!("Block step interval           : {:#?}", &self.block_step);
-            log::info!("Incoming eth tx hashes        : {:#?}", result_incoming_eth);
             log::info!("Execution success hashes      : {:#?}", result_exec_success);
             log::info!("Execution failure hashes      : {:#?}", result_exec_failure);
             log::info!("Execution Multisig hashes     : {:#?}", result_multisig_txs);
