@@ -1,18 +1,7 @@
 defmodule SafeIndexer do
-  @moduledoc """
-  Documentation for `SafeIndexer`.
-  """
+  use Application
 
-  @doc """
-  Hello world.
-
-  ## Examples
-
-      iex> SafeIndexer.hello()
-      :world
-
-  """
-  def hello do
-    :world
+  def start(_type, _args) do
+    IO.puts("Hello, world!")
   end
 end
