@@ -7,7 +7,8 @@ defmodule SafeIndexer.MixProject do
       version: "0.1.0",
       elixir: "~> 1.12",
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
+      escript: escript()
     ]
   end
 
@@ -17,6 +18,10 @@ defmodule SafeIndexer.MixProject do
       mod: {SafeIndexer, []},
       extra_applications: [:logger]
     ]
+  end
+
+  def escript() do 
+    [main_module: SafeIndexer.ScriptStart]
   end
 
   # Run "mix help deps" to learn about dependencies.
