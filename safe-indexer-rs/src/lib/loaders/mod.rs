@@ -1,4 +1,3 @@
-use crate::db::schema::log_entry::dsl::safe_address;
 use crate::rpc::models::{RpcTransaction, RpcTransactionLog, Topic};
 use async_trait::async_trait;
 

@@ -1,6 +1,4 @@
 use crate::config;
-use crate::decoders::http::decoder::HttpDataDecoder;
-use crate::decoders::http::models::HttpDecoderInput;
 use crate::decoders::topic::decoder::{TopicDecoder, TopicDecoderInput};
 use crate::decoders::EthDataDecoder;
 use crate::loaders::{EventLoader, EventLooper};
@@ -15,7 +13,7 @@ pub struct ConsoleLoggerEventLoop {
     start_block: u64,
     sleep_between_ticks_ms: u64,
     block_step: u64,
-    http_data_decoder: TopicDecoder,
+    topic_decoder: TopicDecoder,
 }
 
 impl ConsoleLoggerEventLoop {
@@ -24,7 +22,7 @@ impl ConsoleLoggerEventLoop {
             start_block: config::start_block(),
             sleep_between_ticks_ms: config::iteration_sleep_interval(),
             block_step: config::block_step(),
-            http_data_decoder: TopicDecoder::new(),
+            topic_decoder: TopicDecoder::new(),
         }
     }
 }
@@ -49,6 +47,19 @@ impl EventLooper for ConsoleLoggerEventLoop {
                 event_loader.get_events(safe_address, next_block, Topic::ExecutionSuccess),
                 event_loader.get_events(safe_address, next_block, Topic::ExecutionFailure),
                 event_loader.get_events(safe_address, next_block, Topic::SafeMultisigTransaction),
+            )?;
+
+            try_join!(
+                process_transaction_logs(
+                    Topic::ExecutionSuccess,
+                    &result_exec_success,
+                    &self.topic_decoder,
+                ),
+                process_transaction_logs(
+                    Topic::ExecutionFailure,
+                    &result_exec_failure,
+                    &self.topic_decoder,
+                )
             )?;
 
             // let all_results = {
@@ -99,15 +110,16 @@ impl EventLooper for ConsoleLoggerEventLoop {
 
 async fn process_transaction_logs(
     topic: Topic,
-    tx_logs: Vec<RpcTransactionLog>,
+    tx_logs: &Vec<RpcTransactionLog>,
     topic_decoder: &TopicDecoder,
 ) -> anyhow::Result<()> {
     for tx_log in tx_logs {
         let decoder_input = TopicDecoderInput {
             topic: topic.clone(),
-            data: tx_log.data,
+            data: tx_log.data.to_string(),
         };
         let decoded_output = topic_decoder.decode(decoder_input).await?;
+        log::error!("{:#?}", decoded_output);
     }
     Ok(())
 }
