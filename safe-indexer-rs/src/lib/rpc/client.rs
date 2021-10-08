@@ -22,19 +22,28 @@ impl RpcClient {
         Ok(latest_block_number)
     }
 
+    pub async fn get_transaction_log(
+        &self,
+        safe_address: &str,
+        from: u64,
+        topic: Topic,
+    ) -> anyhow::Result<Vec<RpcTransactionLog>> {
+        let from = BlockNumber::Value(number_utils::to_hex_string(from)?);
+        let request = RpcRequest::build_get_logs(&safe_address, topic, from);
+        let response = self
+            .send_request::<Vec<RpcTransactionLog>>(&request)
+            .await?;
+        Ok(response.result)
+    }
+
     pub async fn get_transaction_hashes_for_event(
         &self,
         safe_address: &str,
         from: u64,
         topic: Topic,
     ) -> anyhow::Result<Vec<String>> {
-        let from = BlockNumber::Value(number_utils::to_hex_string(from)?);
-        let request = RpcRequest::build_get_logs(&safe_address, topic, from);
-        let response = self
-            .send_request::<Vec<RpcTransactionLog>>(&request)
-            .await?;
-        Ok(response
-            .result
+        let transaction_logs = self.get_transaction_log(safe_address, from, topic).await?;
+        Ok(transaction_logs
             .iter()
             .map(|result| result.transaction_hash.to_string())
             .collect())

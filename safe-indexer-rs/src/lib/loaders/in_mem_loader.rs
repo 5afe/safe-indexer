@@ -1,6 +1,6 @@
 use crate::loaders::EventLoader;
 use crate::rpc::client::RpcClient;
-use crate::rpc::models::{RpcTransaction, Topic};
+use crate::rpc::models::{RpcTransaction, RpcTransactionLog, Topic};
 use async_trait::async_trait;
 use std::collections::HashMap;
 use tokio::sync::Mutex;
@@ -29,6 +29,17 @@ impl EventLoader for InMemLoader {
     ) -> anyhow::Result<Vec<String>> {
         self.rpc_client
             .get_transaction_hashes_for_event(safe_address, from, topic)
+            .await
+    }
+
+    async fn get_events_data_for(
+        &self,
+        safe_address: &str,
+        from: u64,
+        topic: Topic,
+    ) -> anyhow::Result<Vec<RpcTransactionLog>> {
+        self.rpc_client
+            .get_transaction_log(safe_address, from, topic)
             .await
     }
 

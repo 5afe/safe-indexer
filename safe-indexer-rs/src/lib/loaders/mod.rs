@@ -1,4 +1,5 @@
-use crate::rpc::models::{RpcTransaction, Topic};
+use crate::db::schema::log_entry::dsl::safe_address;
+use crate::rpc::models::{RpcTransaction, RpcTransactionLog, Topic};
 use async_trait::async_trait;
 
 pub mod default_event_looper;
@@ -12,6 +13,13 @@ pub trait EventLoader {
         from: u64,
         topic: Topic,
     ) -> anyhow::Result<Vec<String>>;
+
+    async fn get_events_data_for(
+        &self,
+        safe_address: &str,
+        from: u64,
+        topic: Topic,
+    ) -> anyhow::Result<Vec<RpcTransactionLog>>;
 
     async fn was_tx_hash_checked(&self, tx_hash: &str) -> bool;
 

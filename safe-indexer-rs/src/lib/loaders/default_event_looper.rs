@@ -1,9 +1,10 @@
 use crate::config;
 use crate::decoders::http::decoder::HttpDataDecoder;
 use crate::decoders::http::models::HttpDecoderInput;
+use crate::decoders::topic::decoder::{TopicDecoder, TopicDecoderInput};
 use crate::decoders::EthDataDecoder;
 use crate::loaders::{EventLoader, EventLooper};
-use crate::rpc::models::Topic;
+use crate::rpc::models::{RpcTransactionLog, Topic};
 use crate::utils::number_utils::to_decimal;
 use async_trait::async_trait;
 use std::time::Duration;
@@ -14,7 +15,7 @@ pub struct ConsoleLoggerEventLoop {
     start_block: u64,
     sleep_between_ticks_ms: u64,
     block_step: u64,
-    http_data_decoder: HttpDataDecoder,
+    http_data_decoder: TopicDecoder,
 }
 
 impl ConsoleLoggerEventLoop {
@@ -23,7 +24,7 @@ impl ConsoleLoggerEventLoop {
             start_block: config::start_block(),
             sleep_between_ticks_ms: config::iteration_sleep_interval(),
             block_step: config::block_step(),
-            http_data_decoder: HttpDataDecoder::new(),
+            http_data_decoder: TopicDecoder::new(),
         }
     }
 }
@@ -45,49 +46,41 @@ impl EventLooper for ConsoleLoggerEventLoop {
             }
 
             let (result_exec_success, result_exec_failure, result_multisig_txs) = try_join!(
-                event_loader.get_transaction_hashes_for_event(
-                    safe_address,
-                    next_block,
-                    Topic::ExecutionSuccess
-                ),
-                event_loader.get_transaction_hashes_for_event(
-                    safe_address,
-                    next_block,
-                    Topic::ExecutionFailure
-                ),
-                event_loader.get_transaction_hashes_for_event(
+                event_loader.get_events_data_for(safe_address, next_block, Topic::ExecutionSuccess),
+                event_loader.get_events_data_for(safe_address, next_block, Topic::ExecutionFailure),
+                event_loader.get_events_data_for(
                     safe_address,
                     next_block,
                     Topic::SafeMultisigTransaction
                 ),
             )?;
 
-            let all_results = {
-                let mut all_results = vec![];
-                all_results.extend(&result_exec_success);
-                all_results.extend(&result_exec_failure);
-                all_results.extend(&result_multisig_txs);
-                all_results
-            };
+            // let all_results = {
+            //     let mut all_results = vec![];
+            //     all_results.extend(&result_exec_success);
+            //     all_results.extend(&result_exec_failure);
+            //     all_results.extend(&result_multisig_txs);
+            //     all_results
+            // };
 
-            let tx_results = {
-                let mut tx_results = vec![];
-                for tx_hash in all_results {
-                    if !event_loader.was_tx_hash_checked(&tx_hash).await {
-                        let rpc_tx = event_loader.process_tx_hash(&tx_hash).await?;
-                        let decoder_input = HttpDecoderInput {
-                            chain_id: to_decimal(&rpc_tx.chain_id)?,
-                            data: rpc_tx.input.to_string(),
-                        };
-                        if self.http_data_decoder.can_decode(&decoder_input) {
-                            let data_decoded = self.http_data_decoder.decode(decoder_input).await?;
-                            tx_results.push(data_decoded);
-                        }
-                        // tx_results.push(event_loader.process_tx_hash(&tx_hash).await?);
-                    }
-                }
-                tx_results
-            };
+            // let tx_results = {
+            //     let mut tx_results = vec![];
+            //     for tx_hash in all_results {
+            //         if !event_loader.was_tx_hash_checked(&tx_hash).await {
+            //             let rpc_tx = event_loader.process_tx_hash(&tx_hash).await?;
+            //             let decoder_input = HttpDecoderInput {
+            //                 chain_id: to_decimal(&rpc_tx.chain_id)?,
+            //                 data: rpc_tx.input.to_string(),
+            //             };
+            //             if self.http_data_decoder.can_decode(&decoder_input) {
+            //                 let data_decoded = self.http_data_decoder.decode(decoder_input).await?;
+            //                 tx_results.push(data_decoded);
+            //             }
+            //             // tx_results.push(event_loader.process_tx_hash(&tx_hash).await?);
+            //         }
+            //     }
+            //     tx_results
+            // };
 
             log::info!("========================================================================");
             log::info!("Starting at block             : {:#?}", self.start_block);
@@ -97,13 +90,22 @@ impl EventLooper for ConsoleLoggerEventLoop {
             log::info!("Execution success hashes      : {:#?}", result_exec_success);
             log::info!("Execution failure hashes      : {:#?}", result_exec_failure);
             log::info!("Execution Multisig hashes     : {:#?}", result_multisig_txs);
-            log::info!("========================================================================");
-            log::info!("New transactions in this loop : {:#?}", tx_results);
-            log::info!("Sleeping for {} milliseconds", &self.sleep_between_ticks_ms);
-            log::info!("========================================================================");
+            // log::info!("========================================================================");
+            // log::info!("New transactions in this loop : {:#?}", tx_results);
+            // log::info!("Sleeping for {} milliseconds", &self.sleep_between_ticks_ms);
+            // log::info!("========================================================================");
 
             sleep(Duration::from_millis(self.sleep_between_ticks_ms)).await;
             next_block += self.block_step;
         }
+    }
+}
+
+async fn process_transaction_logs(
+    tx_logs: Vec<RpcTransactionLog>,
+    topic_decoder: &impl EthDataDecoder,
+) {
+    for tx_log in tx_logs {
+        // tx_log
     }
 }

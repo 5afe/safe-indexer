@@ -17,6 +17,12 @@ impl EthDataDecoder for TopicDecoder {
     }
 }
 
+impl TopicDecoder {
+    pub fn new() -> Self {
+        TopicDecoder
+    }
+}
+
 pub struct TopicDecoderInput {
     pub topic: String,
     pub data: String,
