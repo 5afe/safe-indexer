@@ -46,13 +46,9 @@ impl EventLooper for ConsoleLoggerEventLoop {
             }
 
             let (result_exec_success, result_exec_failure, result_multisig_txs) = try_join!(
-                event_loader.get_events_data_for(safe_address, next_block, Topic::ExecutionSuccess),
-                event_loader.get_events_data_for(safe_address, next_block, Topic::ExecutionFailure),
-                event_loader.get_events_data_for(
-                    safe_address,
-                    next_block,
-                    Topic::SafeMultisigTransaction
-                ),
+                event_loader.get_events(safe_address, next_block, Topic::ExecutionSuccess),
+                event_loader.get_events(safe_address, next_block, Topic::ExecutionFailure),
+                event_loader.get_events(safe_address, next_block, Topic::SafeMultisigTransaction),
             )?;
 
             // let all_results = {
@@ -102,10 +98,16 @@ impl EventLooper for ConsoleLoggerEventLoop {
 }
 
 async fn process_transaction_logs(
+    topic: Topic,
     tx_logs: Vec<RpcTransactionLog>,
-    topic_decoder: &impl EthDataDecoder,
-) {
+    topic_decoder: &TopicDecoder,
+) -> anyhow::Result<()> {
     for tx_log in tx_logs {
-        // tx_log
+        let decoder_input = TopicDecoderInput {
+            topic: topic.clone(),
+            data: tx_log.data,
+        };
+        let decoded_output = topic_decoder.decode(decoder_input).await?;
     }
+    Ok(())
 }

@@ -1,4 +1,5 @@
 use crate::decoders::EthDataDecoder;
+use crate::rpc::models::Topic;
 use async_trait::async_trait;
 
 pub struct TopicDecoder;
@@ -9,11 +10,22 @@ impl EthDataDecoder for TopicDecoder {
     type DecoderInput = TopicDecoderInput;
 
     async fn decode(&self, input: Self::DecoderInput) -> anyhow::Result<Self::DecodedOutput> {
-        todo!()
+        if !self.can_decode(&input) {
+            anyhow::bail!("Can't decode input");
+        }
+        Ok(match input.topic {
+            Topic::IncomingEth => TopicDecodedParams::Unknown,
+            Topic::ExecutionSuccess => TopicDecodedParams::Unknown,
+            Topic::ExecutionFailure => TopicDecodedParams::Unknown,
+            Topic::SafeMultisigTransaction => TopicDecodedParams::Unknown,
+        })
     }
 
     fn can_decode(&self, data: &Self::DecoderInput) -> bool {
-        todo!()
+        match data.topic {
+            Topic::ExecutionSuccess | Topic::ExecutionFailure => true,
+            Topic::SafeMultisigTransaction | Topic::IncomingEth => false,
+        }
     }
 }
 
@@ -24,7 +36,7 @@ impl TopicDecoder {
 }
 
 pub struct TopicDecoderInput {
-    pub topic: String,
+    pub topic: Topic,
     pub data: String,
 }
 
@@ -48,4 +60,5 @@ pub enum TopicDecodedParams {
         signatures: String,
         additional_info: String,
     },
+    Unknown,
 }

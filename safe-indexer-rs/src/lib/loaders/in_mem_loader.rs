@@ -21,18 +21,7 @@ impl InMemLoader {
 
 #[async_trait]
 impl EventLoader for InMemLoader {
-    async fn get_transaction_hashes_for_event(
-        &self,
-        safe_address: &str,
-        from: u64,
-        topic: Topic,
-    ) -> anyhow::Result<Vec<String>> {
-        self.rpc_client
-            .get_transaction_hashes_for_event(safe_address, from, topic)
-            .await
-    }
-
-    async fn get_events_data_for(
+    async fn get_events(
         &self,
         safe_address: &str,
         from: u64,
