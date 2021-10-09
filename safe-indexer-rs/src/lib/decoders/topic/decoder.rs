@@ -21,7 +21,19 @@ impl EthDataDecoder for TopicDecoder {
             Topic::ExecutionFailure => TopicDecodedParams::ExecutionFailure {
                 tx_hash: String::from(&input.data.as_str()[..66]),
             },
-            Topic::SafeMultisigTransaction => TopicDecodedParams::Unknown,
+            Topic::SafeMultisigTransaction => TopicDecodedParams::SafeMultisigTransaction {
+                to: String::from(&input.data.as_str()[..40]),
+                value: String::from(&input.data.as_str()[41..48]),
+                data: String::from(&input.data.as_str()[..40]),
+                operation: String::from(&input.data.as_str()[..40]),
+                safe_tx_gas: String::from(&input.data.as_str()[..40]),
+                base_gas: String::from(&input.data.as_str()[..40]),
+                gas_price: String::from(&input.data.as_str()[..40]),
+                gas_token: "".to_string(),
+                refund_receiver: "".to_string(),
+                signatures: "".to_string(),
+                additional_info: String::from(&input.data.as_str()[100..input.data.len()]),
+            },
         })
     }
 

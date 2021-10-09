@@ -3,7 +3,6 @@ use crate::decoders::topic::decoder::{TopicDecoder, TopicDecoderInput};
 use crate::decoders::EthDataDecoder;
 use crate::loaders::{EventLoader, EventLooper};
 use crate::rpc::models::{RpcTransactionLog, Topic};
-use crate::utils::number_utils::to_decimal;
 use async_trait::async_trait;
 use std::time::Duration;
 use tokio::time::sleep;
@@ -51,43 +50,21 @@ impl EventLooper for ConsoleLoggerEventLoop {
 
             try_join!(
                 process_transaction_logs(
-                    Topic::ExecutionSuccess,
+                    &Topic::ExecutionSuccess,
                     &result_exec_success,
                     &self.topic_decoder,
                 ),
                 process_transaction_logs(
-                    Topic::ExecutionFailure,
+                    &Topic::ExecutionFailure,
                     &result_exec_failure,
                     &self.topic_decoder,
+                ),
+                process_transaction_logs(
+                    &Topic::SafeMultisigTransaction,
+                    &result_multisig_txs,
+                    &self.topic_decoder
                 )
             )?;
-
-            // let all_results = {
-            //     let mut all_results = vec![];
-            //     all_results.extend(&result_exec_success);
-            //     all_results.extend(&result_exec_failure);
-            //     all_results.extend(&result_multisig_txs);
-            //     all_results
-            // };
-
-            // let tx_results = {
-            //     let mut tx_results = vec![];
-            //     for tx_hash in all_results {
-            //         if !event_loader.was_tx_hash_checked(&tx_hash).await {
-            //             let rpc_tx = event_loader.process_tx_hash(&tx_hash).await?;
-            //             let decoder_input = HttpDecoderInput {
-            //                 chain_id: to_decimal(&rpc_tx.chain_id)?,
-            //                 data: rpc_tx.input.to_string(),
-            //             };
-            //             if self.http_data_decoder.can_decode(&decoder_input) {
-            //                 let data_decoded = self.http_data_decoder.decode(decoder_input).await?;
-            //                 tx_results.push(data_decoded);
-            //             }
-            //             // tx_results.push(event_loader.process_tx_hash(&tx_hash).await?);
-            //         }
-            //     }
-            //     tx_results
-            // };
 
             log::info!("========================================================================");
             log::info!("Starting at block             : {:#?}", self.start_block);
@@ -109,7 +86,7 @@ impl EventLooper for ConsoleLoggerEventLoop {
 }
 
 async fn process_transaction_logs(
-    topic: Topic,
+    topic: &Topic,
     tx_logs: &Vec<RpcTransactionLog>,
     topic_decoder: &TopicDecoder,
 ) -> anyhow::Result<()> {
@@ -119,7 +96,7 @@ async fn process_transaction_logs(
             data: tx_log.data.to_string(),
         };
         let decoded_output = topic_decoder.decode(decoder_input).await?;
-        log::error!("{:#?}", decoded_output);
+        log::error!("For topic: {:#? } : {:#?}", topic, decoded_output);
     }
     Ok(())
 }
