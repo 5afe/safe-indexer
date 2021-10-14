@@ -9,4 +9,8 @@ defmodule SafeIndexer.HexUtils do
             Integer.parse(input, 16)
         end
     end
+
+    def to_string(input) do
+        "0x#{Integer.to_string(input, 16)}"
+    end
 end
