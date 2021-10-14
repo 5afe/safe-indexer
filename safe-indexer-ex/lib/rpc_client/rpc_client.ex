@@ -7,7 +7,6 @@ defmodule RpcClient do
         {:ok , body} = Jason.encode(%RpcClient.Request{method: "eth_blockNumber"}); 
         {:ok, response} = post("", body, headers: [{"content-type", "application/json"}]);
         response.body["result"]
-        |> String.slice(2..-1)
-        |> Integer.parse(16)
+        |> SafeIndexer.HexUtils.from_string
     end
 end
