@@ -12,7 +12,7 @@ defmodule RpcClient do
 
     def topics , do: @topics
 
-    def rpc_method(method, params) do
+    def rpc_method(method, params \\ []) do
         {:ok , body} = Jason.encode(
             %RpcClient.Request{method: method, params: params});
         IO.inspect(body);
