@@ -1,5 +1,5 @@
 use crate::config;
-use crate::decoders::topic::decoder::{TopicDecoder, TopicDecoderInput};
+use crate::decoders::topic::decoder::{TopicDecodedParams, TopicDecoder, TopicDecoderInput};
 use crate::decoders::EthDataDecoder;
 use crate::loaders::{EventLoader, EventLooper};
 use crate::rpc::models::{RpcTransactionLog, Topic};
@@ -48,7 +48,11 @@ impl EventLooper for ConsoleLoggerEventLoop {
                 event_loader.get_events(safe_address, next_block, Topic::SafeMultisigTransaction),
             )?;
 
-            try_join!(
+            let (
+                execution_success_results,
+                execution_failure_results,
+                safe_multisig_transaction_results,
+            ) = try_join!(
                 process_transaction_logs(
                     &Topic::ExecutionSuccess,
                     &result_exec_success,
@@ -66,6 +70,20 @@ impl EventLooper for ConsoleLoggerEventLoop {
                 )
             )?;
 
+            let decoded_results = {
+                let mut results = vec![];
+                for result in execution_success_results {
+                    results.push((Topic::ExecutionSuccess, result));
+                }
+                for result in execution_failure_results {
+                    results.push((Topic::ExecutionFailure, result));
+                }
+                for result in safe_multisig_transaction_results {
+                    results.push((Topic::SafeMultisigTransaction, result));
+                }
+                results
+            };
+
             log::info!("========================================================================");
             log::info!("Starting at block             : {:#?}", self.start_block);
             log::info!("Requesting logs for block     : {:#?}", &next_block);
@@ -74,11 +92,10 @@ impl EventLooper for ConsoleLoggerEventLoop {
             log::info!("Execution success hashes      : {:#?}", result_exec_success);
             log::info!("Execution failure hashes      : {:#?}", result_exec_failure);
             log::info!("Execution Multisig hashes     : {:#?}", result_multisig_txs);
-            // log::info!("========================================================================");
-            // log::info!("New transactions in this loop : {:#?}", tx_results);
-            // log::info!("Sleeping for {} milliseconds", &self.sleep_between_ticks_ms);
-            // log::info!("========================================================================");
-
+            log::info!("========================================================================");
+            log::info!("New transactions in this loop : {:#?}", decoded_results);
+            log::info!("Sleeping for {} milliseconds", &self.sleep_between_ticks_ms);
+            log::info!("========================================================================");
             sleep(Duration::from_millis(self.sleep_between_ticks_ms)).await;
             next_block += self.block_step;
         }
@@ -89,14 +106,18 @@ async fn process_transaction_logs(
     topic: &Topic,
     tx_logs: &Vec<RpcTransactionLog>,
     topic_decoder: &TopicDecoder,
-) -> anyhow::Result<()> {
-    for tx_log in tx_logs {
-        let decoder_input = TopicDecoderInput {
-            topic: topic.clone(),
-            data: tx_log.data.to_string(),
-        };
-        let decoded_output = topic_decoder.decode(decoder_input).await?;
-        log::error!("For topic: {:#? } : {:#?}", topic, decoded_output);
-    }
-    Ok(())
+) -> anyhow::Result<Vec<TopicDecodedParams>> {
+    let output = {
+        let mut output = vec![];
+        for tx_log in tx_logs {
+            let decoder_input = TopicDecoderInput {
+                topic: topic.clone(),
+                data: tx_log.data.to_string(),
+            };
+            let decoded_output = topic_decoder.decode(decoder_input).await?;
+            output.push(decoded_output);
+        }
+        output
+    };
+    Ok(output)
 }
