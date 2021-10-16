@@ -1,4 +1,9 @@
 defmodule RpcClient.Request do
     @derive Jason.Encoder
-    defstruct [:method, jsonrpc: "2.0", params: [], id: "1"]
+    defstruct [:method, params: [], jsonrpc: "2.0", id: "1"]
 end 
+
+defmodule RpcClient.Params do
+    @dervive Jason.Encoder
+    defstruct [:address, :topics, fromBlock: "earliest"] 
+end
