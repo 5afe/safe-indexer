@@ -26,7 +26,7 @@ async fn main() -> anyhow::Result<()> {
     dotenv().ok();
     env_logger::init();
 
-    let safe_address = "0xd6f5Bef6bb4acD235CF85c0ce196316d10785d67";
+    let safe_address = "0x26A7ECdB60D38b06FffebA426713AA191CFFC2eD";
     let in_memory_loader = InMemLoader::new(RpcClient::new(reqwest::Client::new()));
     let event_console_looper = ConsoleLoggerEventLoop::new();
 

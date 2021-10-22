@@ -22,17 +22,17 @@ async fn main() -> Result<()> {
             "INCOMING ETH" => {
                 tasks::celery::tx_hashes_for_topic,
                 schedule = DeltaSchedule::new(Duration::from_secs(15)),
-                args = ("0xd6f5Bef6bb4acD235CF85c0ce196316d10785d67".to_string(), config::start_block(), Topic::IncomingEth),
+                args = ("0x26A7ECdB60D38b06FffebA426713AA191CFFC2eD".to_string(), config::start_block(), Topic::IncomingEth),
                 },
             "EXECUTION SUCCESS" => {
                 tasks::celery::tx_hashes_for_topic,
                 schedule = DeltaSchedule::new(Duration::from_secs(15)),
-                args = ("0xd6f5Bef6bb4acD235CF85c0ce196316d10785d67".to_string(), config::start_block(), Topic::ExecutionSuccess),
+                args = ("0x26A7ECdB60D38b06FffebA426713AA191CFFC2eD".to_string(), config::start_block(), Topic::ExecutionSuccess),
                 },
             "EXECUTION FAILURE" => {
                 tasks::celery::tx_hashes_for_topic,
                 schedule = DeltaSchedule::new(Duration::from_secs(15)),
-                args = ("0xd6f5Bef6bb4acD235CF85c0ce196316d10785d67".to_string(), config::start_block(), Topic::ExecutionFailure),
+                args = ("0x26A7ECdB60D38b06FffebA426713AA191CFFC2eD".to_string(), config::start_block(), Topic::ExecutionFailure),
                 }
         ],
         task_routes = [
