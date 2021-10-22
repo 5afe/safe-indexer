@@ -16,10 +16,10 @@ impl EthDataDecoder for TopicDecoder {
         Ok(match input.topic {
             Topic::IncomingEth => TopicDecodedParams::Unknown,
             Topic::ExecutionSuccess => TopicDecodedParams::ExecutionSuccess {
-                tx_hash: String::from(&input.data.as_str()[..66]),
+                safe_tx_hash: String::from(&input.data.as_str()[..66]),
             },
             Topic::ExecutionFailure => TopicDecodedParams::ExecutionFailure {
-                tx_hash: String::from(&input.data.as_str()[..66]),
+                safe_tx_hash: String::from(&input.data.as_str()[..66]),
             },
             Topic::SafeMultisigTransaction => TopicDecodedParams::SafeMultisigTransaction {
                 to: String::from(&input.data.as_str()[..40]),
@@ -59,10 +59,10 @@ pub struct TopicDecoderInput {
 #[derive(Debug)]
 pub enum TopicDecodedParams {
     ExecutionSuccess {
-        tx_hash: String,
+        safe_tx_hash: String,
     },
     ExecutionFailure {
-        tx_hash: String,
+        safe_tx_hash: String,
     },
     SafeMultisigTransaction {
         to: String,
