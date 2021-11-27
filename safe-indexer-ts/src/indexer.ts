@@ -52,15 +52,17 @@ const configDefaults = {
 
 export class SafeIndexer {
 
+    instanceId: string;
     state: State;
     loader: Loader;
     parser: Parser;
     callback: Callback;
-    indexing: boolean = false;
+    running: boolean = true;
     paused: boolean = false;
     config: SafeIndexerConfig;
 
     constructor(state: State, loader: Loader, parser: Parser, callback: Callback, config?: SafeIndexerUserConfig) {
+        this.instanceId = Math.random().toString(36)
         this.state = state;
         this.loader = loader;
         this.parser = parser;
@@ -116,7 +118,7 @@ export class SafeIndexer {
         }
     }
 
-    async start(reverse?: boolean) {
+    async watch(reverse?: boolean) {
         const activeChainId = await this.loader.loadChainId()
         if (this.config.chainId && activeChainId != this.config.chainId) {
             const errorMsg = `Wrong chain! Expected ${this.config.chainId} got ${activeChainId}`
@@ -124,8 +126,7 @@ export class SafeIndexer {
             this.postStatusUpdate({ type: "aborted", reason: errorMsg, code: 1 });
             return
         }
-        this.indexing = true;
-        while(this.indexing) {
+        while(this.running) {
             if (this.paused) {
                 await sleep(this.config.syncTimeout)
                 continue
@@ -135,7 +136,7 @@ export class SafeIndexer {
             const earliestBlock = this.config.earliestBlock;
             const blockInterval = this.getCurrentBlockInterval(earliestBlock, latestBlock, reverse)
             if (!blockInterval) {
-                this.config.logger?.log("Up to date with current block!")
+                this.config.logger?.log(this.instanceId, "Up to date with current block!")
                 this.postStatusUpdate({ type: "up_to_date", latestBlock, earliestBlock });
                 await conditionalSleep(this.config.upToDateTimeout)
                 continue
@@ -143,7 +144,7 @@ export class SafeIndexer {
             const { fromBlock, toBlock } = blockInterval;
             
             this.postStatusUpdate({ type: "processing", fromBlock, toBlock, latestBlock, earliestBlock });
-            this.config.logger?.log("Process from block", fromBlock, "to block", toBlock)
+            this.config.logger?.log(this.instanceId, "Process from block", fromBlock, "to block", toBlock)
             try {
                 await this.processBlocks(fromBlock, toBlock)
                 this.state.lastIndexedBlock = Math.max(toBlock, this.state.lastIndexedBlock)
@@ -154,10 +155,11 @@ export class SafeIndexer {
                 await conditionalSleep(this.config.upToDateTimeout)
             }
         }
+        console.log(this.instanceId, "Shutting down")
     }
 
-    stop() {
-        this.indexing = false;
+    shutdown() {
+        this.running = false;
     }
 
     pause() {
