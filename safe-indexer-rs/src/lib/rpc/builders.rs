@@ -46,7 +46,7 @@ impl Topic {
                 String::from("0x23428b18acfb3ea64b08dc0c1d296ea9c09702c09083ca5272e64d115b687d23")
             }
             Topic::SafeMultisigTransaction => {
-                String::from("0x19e764001f2cb3b0a6315f2efccf09084fbfcda01b50198d7d093a91e491f34b")
+                String::from("0x66753cd2356569ee081232e3be8909b950e0a76c1f8460c3a5e3c2be32b11bed")
             }
         }
     }

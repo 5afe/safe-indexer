@@ -22,7 +22,7 @@ impl EthDataDecoder for TopicDecoder {
                 safe_tx_hash: String::from(&input.data.as_str()[..66]),
             },
             Topic::SafeMultisigTransaction => TopicDecodedOutput::SafeMultisigTransaction {
-                to: String::from(&input.data.as_str()[..40]),
+                to: String::from(&input.data.as_str()[26..66]),
                 value: String::from(&input.data.as_str()[41..48]),
                 data: String::from(&input.data.as_str()[..40]),
                 operation: String::from(&input.data.as_str()[..40]),
@@ -39,8 +39,10 @@ impl EthDataDecoder for TopicDecoder {
 
     fn can_decode(&self, data: &Self::DecoderInput) -> bool {
         match data.topic {
-            Topic::ExecutionSuccess | Topic::ExecutionFailure => true,
-            Topic::SafeMultisigTransaction | Topic::IncomingEth => false,
+            Topic::ExecutionSuccess | Topic::ExecutionFailure | Topic::SafeMultisigTransaction => {
+                true
+            }
+            Topic::IncomingEth => false,
         }
     }
 }
