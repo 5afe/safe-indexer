@@ -19,7 +19,7 @@ path = "src/consumer/main.rs"
 
 [[bin]]
 name = "looper"
-path = "src/lib/lib.rs"
+path = "src/looper/main.rs"
 
 [dependencies]
 celery = "0.4.0-rc8"

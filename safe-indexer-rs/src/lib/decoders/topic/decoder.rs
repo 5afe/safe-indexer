@@ -6,7 +6,7 @@ pub struct TopicDecoder;
 
 #[async_trait]
 impl EthDataDecoder for TopicDecoder {
-    type DecodedOutput = TopicDecodedParams;
+    type DecodedOutput = TopicDecodedOutput;
     type DecoderInput = TopicDecoderInput;
 
     async fn decode(&self, input: Self::DecoderInput) -> anyhow::Result<Self::DecodedOutput> {
@@ -14,14 +14,14 @@ impl EthDataDecoder for TopicDecoder {
             anyhow::bail!("Can't decode input");
         }
         Ok(match input.topic {
-            Topic::IncomingEth => TopicDecodedParams::Unknown,
-            Topic::ExecutionSuccess => TopicDecodedParams::ExecutionSuccess {
+            Topic::IncomingEth => TopicDecodedOutput::Unknown,
+            Topic::ExecutionSuccess => TopicDecodedOutput::ExecutionSuccess {
                 safe_tx_hash: String::from(&input.data.as_str()[..66]),
             },
-            Topic::ExecutionFailure => TopicDecodedParams::ExecutionFailure {
+            Topic::ExecutionFailure => TopicDecodedOutput::ExecutionFailure {
                 safe_tx_hash: String::from(&input.data.as_str()[..66]),
             },
-            Topic::SafeMultisigTransaction => TopicDecodedParams::SafeMultisigTransaction {
+            Topic::SafeMultisigTransaction => TopicDecodedOutput::SafeMultisigTransaction {
                 to: String::from(&input.data.as_str()[..40]),
                 value: String::from(&input.data.as_str()[41..48]),
                 data: String::from(&input.data.as_str()[..40]),
@@ -57,7 +57,7 @@ pub struct TopicDecoderInput {
 }
 
 #[derive(Debug)]
-pub enum TopicDecodedParams {
+pub enum TopicDecodedOutput {
     ExecutionSuccess {
         safe_tx_hash: String,
     },

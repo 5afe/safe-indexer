@@ -1,5 +1,5 @@
 use crate::config;
-use crate::decoders::topic::decoder::{TopicDecodedParams, TopicDecoder, TopicDecoderInput};
+use crate::decoders::topic::decoder::{TopicDecodedOutput, TopicDecoder, TopicDecoderInput};
 use crate::decoders::EthDataDecoder;
 use crate::loaders::{EventLoader, EventLooper};
 use crate::rpc::models::{RpcTransactionLog, Topic};
@@ -106,7 +106,7 @@ async fn process_transaction_logs(
     topic: &Topic,
     tx_logs: &Vec<RpcTransactionLog>,
     topic_decoder: &TopicDecoder,
-) -> anyhow::Result<Vec<TopicDecodedParams>> {
+) -> anyhow::Result<Vec<TopicDecodedOutput>> {
     let output = {
         let mut output = vec![];
         for tx_log in tx_logs {
