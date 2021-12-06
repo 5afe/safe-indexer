@@ -10,7 +10,8 @@ pub enum Topic {
 }
 
 // Adding more types as we need them for new Topics
-#[cfg_attr(test, derive(PartialEq, Debug))]
+#[derive(Debug)]
+#[cfg_attr(test, derive(PartialEq))]
 pub enum TopicArgument {
     Address,
     Uint8,

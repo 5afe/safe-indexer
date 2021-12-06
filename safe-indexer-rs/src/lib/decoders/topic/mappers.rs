@@ -70,7 +70,7 @@ impl FromStr for TopicArgument {
     fn from_str(input: &str) -> Result<Self, Self::Err> {
         match input {
             "address" => Ok(TopicArgument::Address),
-            "unit8" => Ok(TopicArgument::Uint8),
+            "uint8" => Ok(TopicArgument::Uint8),
             "uint256" => Ok(TopicArgument::Uint256),
             "bytes" => Ok(TopicArgument::Bytes),
             "bytes32" => Ok(TopicArgument::Bytes32),
@@ -83,18 +83,55 @@ impl FromStr for TopicArgument {
 mod tests {
     use std::str::FromStr;
 
-    use crate::decoders::topic::models::{Topic, TopicArgument, TopicSignature};
-
-    use super::INCOMING_ETH;
+    use crate::decoders::topic::{
+        mappers::{EXECUTION_FAILURE, EXECUTION_SUCCESS, SAFE_MULTISIG_TRANSACTION},
+        models::{Topic, TopicArgument, TopicSignature},
+    };
 
     #[test]
-    fn incoming_eth() {
+    fn execution_success() {
         let expected = Ok(TopicSignature {
-            topic: Topic::IncomingEth,
-            arguments: vec![TopicArgument::Address, TopicArgument::Uint256],
+            topic: Topic::ExecutionSuccess,
+            arguments: vec![TopicArgument::Bytes32, TopicArgument::Uint256],
         });
 
-        let actual = TopicSignature::from_str(INCOMING_ETH);
+        let actual = TopicSignature::from_str(EXECUTION_SUCCESS);
+
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn execution_failure() {
+        let expected = Ok(TopicSignature {
+            topic: Topic::ExecutionFailure,
+            arguments: vec![TopicArgument::Bytes32, TopicArgument::Uint256],
+        });
+
+        let actual = TopicSignature::from_str(EXECUTION_FAILURE);
+
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn safe_multisig_transaction() {
+        let expected = Ok(TopicSignature {
+            topic: Topic::SafeMultisigTransaction,
+            arguments: vec![
+                TopicArgument::Address,
+                TopicArgument::Uint256,
+                TopicArgument::Bytes,
+                TopicArgument::Uint8,
+                TopicArgument::Uint256,
+                TopicArgument::Uint256,
+                TopicArgument::Uint256,
+                TopicArgument::Address,
+                TopicArgument::Address,
+                TopicArgument::Bytes,
+                TopicArgument::Bytes,
+            ],
+        });
+
+        let actual = TopicSignature::from_str(SAFE_MULTISIG_TRANSACTION);
 
         assert_eq!(expected, actual);
     }
