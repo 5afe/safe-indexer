@@ -1,4 +1,7 @@
-use crate::rpc::models::{RpcTransaction, RpcTransactionLog, Topic};
+use crate::{
+    decoders::topic::models::Topic,
+    rpc::models::{RpcTransaction, RpcTransactionLog},
+};
 use async_trait::async_trait;
 
 pub mod default_event_looper;

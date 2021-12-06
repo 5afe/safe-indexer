@@ -1,3 +1,4 @@
 pub mod decoder;
 pub mod eth_data;
-mod models;
+pub mod models;
+mod signature;

@@ -1,7 +1,17 @@
-const WORD_LENGTH: usize = 64; // data in hex -> 2x single hex char == 1 byte
+use serde::{Deserialize, Serialize};
+
+#[derive(Deserialize, Serialize, Clone, Debug)]
+pub enum Topic {
+    IncomingEth,
+    ExecutionSuccess,
+    ExecutionFailure,
+    SafeMultisigTransaction,
+}
 
 #[cfg_attr(test, derive(PartialEq, Debug))]
 pub struct DataChunks(Vec<String>);
+
+const WORD_LENGTH: usize = 64; // data in hex -> 2x single hex char == 1 byte
 
 impl From<String> for DataChunks {
     fn from(raw_input: String) -> Self {

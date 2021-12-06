@@ -1,5 +1,5 @@
+use super::models::Topic;
 use crate::decoders::EthDataDecoder;
-use crate::rpc::models::Topic;
 use async_trait::async_trait;
 
 pub struct TopicDecoder;

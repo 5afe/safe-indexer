@@ -1,4 +1,7 @@
-use crate::rpc::models::{BlockNumber, RequestParam, RpcRequest, Topic};
+use crate::{
+    decoders::topic::models::Topic,
+    rpc::models::{BlockNumber, RequestParam, RpcRequest},
+};
 
 impl RpcRequest {
     pub fn build_get_logs(address: &str, topic: Topic, from: BlockNumber) -> Self {

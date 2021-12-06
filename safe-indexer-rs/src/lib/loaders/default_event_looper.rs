@@ -1,8 +1,9 @@
 use crate::config;
 use crate::decoders::topic::decoder::{TopicDecodedOutput, TopicDecoder, TopicDecoderInput};
+use crate::decoders::topic::models::Topic;
 use crate::decoders::EthDataDecoder;
 use crate::loaders::{EventLoader, EventLooper};
-use crate::rpc::models::{RpcTransactionLog, Topic};
+use crate::rpc::models::RpcTransactionLog;
 use async_trait::async_trait;
 use std::time::Duration;
 use tokio::time::sleep;

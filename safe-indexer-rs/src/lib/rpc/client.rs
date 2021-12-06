@@ -1,9 +1,8 @@
 use serde::de::DeserializeOwned;
 
 use crate::config;
-use crate::rpc::models::{
-    BlockNumber, RpcRequest, RpcResponse, RpcTransaction, RpcTransactionLog, Topic,
-};
+use crate::decoders::topic::models::Topic;
+use crate::rpc::models::{BlockNumber, RpcRequest, RpcResponse, RpcTransaction, RpcTransactionLog};
 use crate::utils::number_utils;
 
 pub struct RpcClient {

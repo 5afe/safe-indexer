@@ -1,6 +1,7 @@
+use crate::decoders::topic::models::Topic;
 use crate::loaders::EventLoader;
 use crate::rpc::client::RpcClient;
-use crate::rpc::models::{RpcTransaction, RpcTransactionLog, Topic};
+use crate::rpc::models::{RpcTransaction, RpcTransactionLog};
 use async_trait::async_trait;
 use std::collections::HashMap;
 use tokio::sync::Mutex;

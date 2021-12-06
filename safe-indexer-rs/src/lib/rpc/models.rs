@@ -67,11 +67,3 @@ pub enum BlockNumber {
     Latest,
     Pending,
 }
-
-#[derive(Deserialize, Serialize, Clone, Debug)]
-pub enum Topic {
-    IncomingEth,
-    ExecutionSuccess,
-    ExecutionFailure,
-    SafeMultisigTransaction,
-}
