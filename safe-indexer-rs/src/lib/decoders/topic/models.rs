@@ -1,11 +1,28 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Serialize, Clone, Debug)]
+#[cfg_attr(test, derive(PartialEq))]
 pub enum Topic {
     IncomingEth,
     ExecutionSuccess,
     ExecutionFailure,
     SafeMultisigTransaction,
+}
+
+// Adding more types as we need them for new Topics
+#[cfg_attr(test, derive(PartialEq, Debug))]
+pub enum TopicArgument {
+    Address,
+    Uint8,
+    Uint256,
+    Bytes,
+    Bytes32,
+}
+
+#[cfg_attr(test, derive(PartialEq, Debug))]
+pub struct TopicSignature {
+    pub topic: Topic,
+    pub arguments: Vec<TopicArgument>,
 }
 
 #[cfg_attr(test, derive(PartialEq, Debug))]
