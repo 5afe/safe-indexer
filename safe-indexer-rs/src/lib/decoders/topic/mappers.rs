@@ -1,3 +1,5 @@
+use crate::utils::number_utils::keccak256_str;
+
 use super::models::{Topic, TopicArgument, TopicSignature};
 use std::str::FromStr;
 
@@ -10,21 +12,12 @@ pub const EXECUTION_FAILURE: &str = "ExecutionFailure(bytes32,uint256)";
 pub const SAFE_MULTISIG_TRANSACTION: &str = "SafeMultiSigTransaction(address,uint256,bytes,uint8,uint256,uint256,uint256,address,address,bytes,bytes)";
 
 impl Topic {
-    // TODO: change impl to use Keccak
     pub fn get_hash(&self) -> String {
         match self {
-            Topic::IncomingEth => {
-                String::from("0x3d0ce9bfc3ed7d6862dbb28b2dea94561fe714a1b4d019aa8af39730d1ad7c3d")
-            }
-            Topic::ExecutionSuccess => {
-                String::from("0x442e715f626346e8c54381002da614f62bee8d27386535b2521ec8540898556e")
-            }
-            Topic::ExecutionFailure => {
-                String::from("0x23428b18acfb3ea64b08dc0c1d296ea9c09702c09083ca5272e64d115b687d23")
-            }
-            Topic::SafeMultisigTransaction => {
-                String::from("0x66753cd2356569ee081232e3be8909b950e0a76c1f8460c3a5e3c2be32b11bed")
-            }
+            Topic::IncomingEth => keccak256_str(INCOMING_ETH),
+            Topic::ExecutionSuccess => keccak256_str(EXECUTION_SUCCESS),
+            Topic::ExecutionFailure => keccak256_str(EXECUTION_FAILURE),
+            Topic::SafeMultisigTransaction => keccak256_str(SAFE_MULTISIG_TRANSACTION),
         }
     }
 }
@@ -133,6 +126,38 @@ mod tests {
 
         let actual = TopicSignature::from_str(SAFE_MULTISIG_TRANSACTION);
 
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn incoming_eth_topic_digest() {
+        let expected =
+            String::from("0x3d0ce9bfc3ed7d6862dbb28b2dea94561fe714a1b4d019aa8af39730d1ad7c3d");
+        let actual = Topic::IncomingEth.get_hash();
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn execusion_success_topic_digest() {
+        let expected =
+            String::from("0x442e715f626346e8c54381002da614f62bee8d27386535b2521ec8540898556e");
+        let actual = Topic::ExecutionSuccess.get_hash();
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn execusion_failure_topic_digest() {
+        let expected =
+            String::from("0x23428b18acfb3ea64b08dc0c1d296ea9c09702c09083ca5272e64d115b687d23");
+        let actual = Topic::ExecutionFailure.get_hash();
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn safe_multisig_transaction_topic_digest() {
+        let expected =
+            String::from("0x66753cd2356569ee081232e3be8909b950e0a76c1f8460c3a5e3c2be32b11bed");
+        let actual = Topic::SafeMultisigTransaction.get_hash();
         assert_eq!(expected, actual);
     }
 }

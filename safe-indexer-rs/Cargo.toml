@@ -22,26 +22,20 @@ name = "looper"
 path = "src/looper/main.rs"
 
 [dependencies]
+anyhow = "1.0"
+async-trait = "0.1.51"
 celery = "0.4.0-rc8"
 celery-codegen = "0.4.0-rc8"
-
+diesel = { version = "1.4.7", features = ["postgres"] }
+dotenv = "0.15.0"
+dotenv_codegen = "0.15.0"
+env_logger = "0.9"
+futures = "0.3"
+hex = "0.4"
+log = "0.4"
+reqwest = { version = "0.11", features = ["json"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 serde_repr = "0.1"
-
+tiny-keccak = { version = "2.0", features = ["keccak"] }
 tokio = "1.10"
-
-anyhow = "1.0"
-
-env_logger = "0.9"
-log = "0.4"
-
-dotenv = "0.15.0"
-dotenv_codegen = "0.15.0"
-
-reqwest = { version = "0.11", features = ["json"] }
-
-diesel = { version = "1.4.7", features = ["postgres"] }
-
-async-trait = "0.1.51"
-futures = "0.3"
