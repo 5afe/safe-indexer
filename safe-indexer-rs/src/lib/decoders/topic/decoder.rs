@@ -13,28 +13,7 @@ impl EthDataDecoder for TopicDecoder {
         if !self.can_decode(&input) {
             anyhow::bail!("Can't decode input");
         }
-        Ok(match input.topic {
-            Topic::IncomingEth => TopicDecodedOutput::Unknown,
-            Topic::ExecutionSuccess => TopicDecodedOutput::ExecutionSuccess {
-                safe_tx_hash: String::from(&input.data.as_str()[..66]),
-            },
-            Topic::ExecutionFailure => TopicDecodedOutput::ExecutionFailure {
-                safe_tx_hash: String::from(&input.data.as_str()[..66]),
-            },
-            Topic::SafeMultisigTransaction => TopicDecodedOutput::SafeMultisigTransaction {
-                to: String::from(&input.data.as_str()[26..66]),
-                value: String::from(&input.data.as_str()[41..48]),
-                data: String::from(&input.data.as_str()[..40]),
-                operation: String::from(&input.data.as_str()[..40]),
-                safe_tx_gas: String::from(&input.data.as_str()[..40]),
-                base_gas: String::from(&input.data.as_str()[..40]),
-                gas_price: String::from(&input.data.as_str()[..40]),
-                gas_token: "".to_string(),
-                refund_receiver: "".to_string(),
-                signatures: "".to_string(),
-                additional_info: String::from(&input.data.as_str()[100..input.data.len()]),
-            },
-        })
+        Ok(input.topic.decode(input.data.into())?)
     }
 
     fn can_decode(&self, data: &Self::DecoderInput) -> bool {

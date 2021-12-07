@@ -33,7 +33,7 @@ pub struct TopicSignature {
 }
 
 #[cfg_attr(test, derive(PartialEq, Debug))]
-pub struct DataChunks(Vec<String>);
+pub struct DataChunks(pub Vec<String>);
 
 const WORD_LENGTH: usize = 64; // data in hex -> 2x single hex char == 1 byte
 
