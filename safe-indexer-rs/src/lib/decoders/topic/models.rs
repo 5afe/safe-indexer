@@ -1,5 +1,11 @@
 use serde::{Deserialize, Serialize};
 
+pub struct TopicMetadata {
+    pub topic: Topic,
+    pub digest: String,
+    pub signature: TopicSignature,
+}
+
 #[derive(Deserialize, Serialize, Clone, Debug)]
 #[cfg_attr(test, derive(PartialEq))]
 pub enum Topic {

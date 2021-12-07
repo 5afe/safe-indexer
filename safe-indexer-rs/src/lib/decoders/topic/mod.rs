@@ -1,4 +1,4 @@
 pub mod decoder;
-pub mod eth_data;
-pub mod mappers;
+pub mod initializer;
 pub mod models;
+pub mod parsers;

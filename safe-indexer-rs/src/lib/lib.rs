@@ -3,6 +3,8 @@ extern crate celery_codegen;
 #[macro_use]
 extern crate diesel;
 extern crate dotenv;
+#[macro_use]
+extern crate lazy_static;
 extern crate log;
 extern crate reqwest;
 

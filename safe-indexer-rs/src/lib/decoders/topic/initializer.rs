@@ -1,18 +1,56 @@
 use crate::utils::number_utils::keccak256_str;
 
-use super::models::{Topic, TopicArgument, TopicSignature};
+use super::models::{Topic, TopicArgument, TopicMetadata, TopicSignature};
+use lazy_static;
 use std::str::FromStr;
 
-#[cfg_attr(test, derive(PartialEq, Debug))]
+lazy_static! {
+    pub static ref INCOMING_ETH_TOPIC: TopicMetadata = TopicMetadata {
+        topic: Topic::IncomingEth,
+        digest: Topic::IncomingEth.calculate_hash(),
+        signature: TopicSignature::from_str(INCOMING_ETH)
+            .expect("SafeReceived event parsing failure")
+    };
+    pub static ref EXECUTION_SUCCESS_TOPIC: TopicMetadata = TopicMetadata {
+        topic: Topic::ExecutionSuccess,
+        digest: Topic::ExecutionSuccess.calculate_hash(),
+        signature: TopicSignature::from_str(EXECUTION_SUCCESS)
+            .expect("ExecutionSuccess event parsing failure")
+    };
+    pub static ref EXECUTION_FAILURE_TOPIC: TopicMetadata = TopicMetadata {
+        topic: Topic::ExecutionFailure,
+        digest: Topic::ExecutionFailure.calculate_hash(),
+        signature: TopicSignature::from_str(EXECUTION_FAILURE)
+            .expect("ExecutionFailure event parsing failure")
+    };
+    pub static ref SAFE_MULTISIG_TRANSACTION_TOPIC: TopicMetadata = TopicMetadata {
+        topic: Topic::SafeMultisigTransaction,
+        digest: Topic::SafeMultisigTransaction.calculate_hash(),
+        signature: TopicSignature::from_str(SAFE_MULTISIG_TRANSACTION)
+            .expect("SafeMultiSigTransaction event parsing failure")
+    };
+}
+
+#[derive(Debug)]
+#[cfg_attr(test, derive(PartialEq))]
 pub struct TopicParseError;
 
-pub const INCOMING_ETH: &str = "SafeReceived(address,uint256)";
-pub const EXECUTION_SUCCESS: &str = "ExecutionSuccess(bytes32,uint256)";
-pub const EXECUTION_FAILURE: &str = "ExecutionFailure(bytes32,uint256)";
-pub const SAFE_MULTISIG_TRANSACTION: &str = "SafeMultiSigTransaction(address,uint256,bytes,uint8,uint256,uint256,uint256,address,address,bytes,bytes)";
+const INCOMING_ETH: &str = "SafeReceived(address,uint256)";
+const EXECUTION_SUCCESS: &str = "ExecutionSuccess(bytes32,uint256)";
+const EXECUTION_FAILURE: &str = "ExecutionFailure(bytes32,uint256)";
+const SAFE_MULTISIG_TRANSACTION: &str = "SafeMultiSigTransaction(address,uint256,bytes,uint8,uint256,uint256,uint256,address,address,bytes,bytes)";
 
 impl Topic {
     pub fn get_hash(&self) -> String {
+        String::from(match self {
+            Topic::IncomingEth => &INCOMING_ETH_TOPIC.digest,
+            Topic::ExecutionSuccess => &EXECUTION_SUCCESS_TOPIC.digest,
+            Topic::ExecutionFailure => &EXECUTION_FAILURE_TOPIC.digest,
+            Topic::SafeMultisigTransaction => &SAFE_MULTISIG_TRANSACTION_TOPIC.digest,
+        })
+    }
+
+    fn calculate_hash(&self) -> String {
         match self {
             Topic::IncomingEth => keccak256_str(INCOMING_ETH),
             Topic::ExecutionSuccess => keccak256_str(EXECUTION_SUCCESS),
@@ -77,7 +115,7 @@ mod tests {
     use std::str::FromStr;
 
     use crate::decoders::topic::{
-        mappers::{EXECUTION_FAILURE, EXECUTION_SUCCESS, SAFE_MULTISIG_TRANSACTION},
+        initializer::{EXECUTION_FAILURE, EXECUTION_SUCCESS, SAFE_MULTISIG_TRANSACTION},
         models::{Topic, TopicArgument, TopicSignature},
     };
 
