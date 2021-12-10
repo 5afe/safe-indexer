@@ -49,11 +49,6 @@ impl Topic {
 
 impl DataChunks {
     fn value_of_dyn_type(&self, start_index: usize) -> String {
-        log::debug!(
-            "Parsing chunk: {} \nIndex: {}",
-            self.get(start_index),
-            start_index
-        );
         let offset_bytes = from_hex_string(self.get(start_index)).expect(&format!(
             "Dynamic type at index {} has unexpected offset",
             start_index
@@ -78,7 +73,9 @@ impl DataChunks {
                 current_data_index += 1;
             }
         }
-        output.push_str(&self.get(current_data_index)[0..(last_chunk_carry as usize)]);
+        if last_chunk_carry > 0 {
+            output.push_str(&self.get(current_data_index)[0..(last_chunk_carry as usize)]);
+        }
         output
     }
 }
