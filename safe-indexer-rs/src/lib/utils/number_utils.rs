@@ -6,7 +6,11 @@ pub fn to_hex_string(input: u64) -> Result<String> {
 }
 
 pub fn from_hex_string(input: &str) -> Result<u64> {
-    let result = &input[2..input.len()];
+    let result = if input.starts_with("0x") {
+        &input[2..input.len()]
+    } else {
+        input
+    };
     Ok(u64::from_str_radix(&result, 16)?)
 }
 

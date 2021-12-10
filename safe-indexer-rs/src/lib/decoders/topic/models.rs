@@ -33,7 +33,21 @@ pub struct TopicSignature {
 }
 
 #[cfg_attr(test, derive(PartialEq, Debug))]
-pub struct DataChunks(pub Vec<String>);
+pub struct DataChunks(Vec<String>);
+
+impl DataChunks {
+    pub fn new(chunks: Vec<String>) -> Self {
+        DataChunks(chunks)
+    }
+
+    pub fn get(&self, index: usize) -> &str {
+        &self.0[index]
+    }
+
+    pub fn as_slice(&self) -> &[String] {
+        &self.0.as_slice()
+    }
+}
 
 const WORD_LENGTH: usize = 64; // data in hex -> 2x single hex char == 1 byte
 
@@ -91,7 +105,7 @@ mod tests {
             0000000000000000000000000000000000000000000000000000000000000001",
         );
         let actual_chunks: DataChunks = input.into();
-        let expected_chunks = DataChunks(vec![
+        let expected_chunks = DataChunks::new(vec![
             "00000000000000000000000026a7ecdb60d38b06fffeba426713aa191cffc2ed".to_string(),
             "0000000000000000000000000000000000000000000000000000000000000000".to_string(),
             "0000000000000000000000000000000000000000000000000000000000000160".to_string(),
@@ -138,7 +152,7 @@ mod tests {
         let input =
             String::from("0x0000000000000000000000005592ec0cfb4dbc12d3ab100b257153436a1f0fea");
         let actual_chunks: DataChunks = input.into();
-        let expected_chunks = DataChunks(vec![String::from(
+        let expected_chunks = DataChunks::new(vec![String::from(
             "0000000000000000000000005592ec0cfb4dbc12d3ab100b257153436a1f0fea",
         )]);
         assert_eq!(actual_chunks, expected_chunks);
