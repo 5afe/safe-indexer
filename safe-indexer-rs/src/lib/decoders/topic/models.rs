@@ -49,7 +49,7 @@ impl DataChunks {
     }
 }
 
-const WORD_LENGTH: usize = 64; // data in hex -> 2x single hex char == 1 byte
+pub const WORD_LENGTH: usize = 64; // data in hex -> 2x single hex char == 1 byte
 
 impl From<String> for DataChunks {
     fn from(raw_input: String) -> Self {
