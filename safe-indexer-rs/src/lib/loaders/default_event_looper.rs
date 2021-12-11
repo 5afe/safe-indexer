@@ -115,7 +115,7 @@ async fn process_transaction_logs(
                 topic: topic.clone(),
                 data: tx_log.data.to_string(),
             };
-            let decoded_output = topic_decoder.decode(decoder_input).await?;
+            let decoded_output = topic_decoder.decode(decoder_input)?;
             output.push(decoded_output);
         }
         output
