@@ -36,6 +36,7 @@ pub struct TopicDecoderInput {
 }
 
 #[derive(Debug)]
+#[cfg_attr(test, derive(PartialEq))]
 pub enum TopicDecodedOutput {
     ExecutionSuccess {
         safe_tx_hash: String,
@@ -70,14 +71,31 @@ mod tests {
             topic: Topic::ExecutionSuccess,
             data: String::from("0xd2c64a47741878350c85ad6ad202800dc4ce3bb7cbdf9e60399bf71e6d4bd64c0000000000000000000000000000000000000000000000000000000000000000"),
         };
+        let expected = TopicDecodedOutput::ExecutionSuccess {
+            safe_tx_hash: String::from(
+                "d2c64a47741878350c85ad6ad202800dc4ce3bb7cbdf9e60399bf71e6d4bd64c",
+            ),
+        };
 
         let actual = decoder.decode(decoder_input).unwrap();
+        assert_eq!(expected, actual);
     }
 
     #[test]
     fn execution_failure() {
         let decoder = TopicDecoder::new();
-        let data = "0xd2c64a47741878350c85ad6ad202800dc4ce3bb7cbdf9e60399bf71e6d4bd64c0000000000000000000000000000000000000000000000000000000000000000";
+        let decoder_input = TopicDecoderInput {
+            topic: Topic::ExecutionFailure,
+            data: String::from("0xd2c64a47741878350c85ad6ad202800dc4ce3bb7cbdf9e60399bf71e6d4bd64c0000000000000000000000000000000000000000000000000000000000000000"),
+        };
+        let expected = TopicDecodedOutput::ExecutionFailure {
+            safe_tx_hash: String::from(
+                "d2c64a47741878350c85ad6ad202800dc4ce3bb7cbdf9e60399bf71e6d4bd64c",
+            ),
+        };
+
+        let actual = decoder.decode(decoder_input).unwrap();
+        assert_eq!(expected, actual);
     }
 
     #[test]
