@@ -12,7 +12,6 @@ use super::{
 
 impl Topic {
     pub fn decode(&self, data_chunks: DataChunks) -> anyhow::Result<TopicDecodedOutput> {
-        // let chunks = data_chunks.0;
         Ok(match self {
             Topic::IncomingEth => TopicDecodedOutput::Unknown,
             Topic::ExecutionSuccess => TopicDecodedOutput::ExecutionSuccess {
@@ -64,6 +63,7 @@ impl DataChunks {
 
         let mut current_data_index = offset_index + 1;
         let mut output = String::new();
+        output.push_str("0x");
         let data_chunks = value_size_hex.div(WORD_LENGTH as u64);
         let last_chunk_carry = value_size_hex % (WORD_LENGTH as u64);
 
@@ -82,12 +82,18 @@ impl DataChunks {
 
 impl TopicArgument {
     fn parse(&self, index: usize, chunks: &DataChunks) -> String {
-        match self {
-            TopicArgument::Address => chunks.as_slice()[index][24..64].to_string(),
-            TopicArgument::Uint8 => chunks.as_slice()[index][56..64].to_string(),
-            TopicArgument::Uint256 | TopicArgument::Bytes32 => chunks.as_slice()[index].to_owned(),
+        let output = match self {
+            TopicArgument::Address => format!("0x{}", chunks.as_slice()[index][24..64].to_string()),
+            TopicArgument::Uint8 => from_hex_string(&chunks.as_slice()[index][56..64])
+                .expect("Uint8 parse error")
+                .to_string(),
+            TopicArgument::Uint256 => from_hex_string(&chunks.as_slice()[index])
+                .expect("Uint256 parse error")
+                .to_string(),
+            TopicArgument::Bytes32 => format!("0x{}", chunks.as_slice()[index]),
             TopicArgument::Bytes => chunks.value_of_dyn_type(index),
-        }
+        };
+        output
     }
 }
 

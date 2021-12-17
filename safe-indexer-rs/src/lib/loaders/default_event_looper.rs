@@ -74,13 +74,13 @@ impl EventLooper for ConsoleLoggerEventLoop {
             let decoded_results = {
                 let mut results = vec![];
                 for result in execution_success_results {
-                    results.push((Topic::ExecutionSuccess, result));
+                    results.push(result);
                 }
                 for result in execution_failure_results {
-                    results.push((Topic::ExecutionFailure, result));
+                    results.push(result);
                 }
                 for result in safe_multisig_transaction_results {
-                    results.push((Topic::SafeMultisigTransaction, result));
+                    results.push(result);
                 }
                 results
             };
@@ -97,6 +97,7 @@ impl EventLooper for ConsoleLoggerEventLoop {
             log::info!("New transactions in this loop : {:#?}", decoded_results);
             log::info!("Sleeping for {} milliseconds", &self.sleep_between_ticks_ms);
             log::info!("========================================================================");
+            log::info!("\n");
             sleep(Duration::from_millis(self.sleep_between_ticks_ms)).await;
             next_block += self.block_step;
         }
