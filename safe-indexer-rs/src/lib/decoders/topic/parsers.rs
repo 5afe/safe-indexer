@@ -107,7 +107,7 @@ mod tests {
         let chunks = DataChunks::new(vec![
             "00000000000000000000000026a7ecdb60d38b06fffeba426713aa191cffc2ed".to_string(),
         ]);
-        let expected = "26a7ecdb60d38b06fffeba426713aa191cffc2ed";
+        let expected = "0x26a7ecdb60d38b06fffeba426713aa191cffc2ed";
 
         let actual = topic_argument.parse(0, &chunks);
         assert_eq!(actual, expected);
@@ -134,7 +134,7 @@ mod tests {
             "0000000100000000000000000000000000000000000000000000000000000000".to_string(),
         ]);
 
-        let expected = "0d582f13000000000000000000000000be8c10dbf4c6148f9834c56c3331f819\
+        let expected = "0x0d582f13000000000000000000000000be8c10dbf4c6148f9834c56c3331f819\
         1f35555200000000000000000000000000000000000000000000000000000000\
         00000001";
 
@@ -169,9 +169,9 @@ mod tests {
         ]);
 
         let expected = [
-            "26a7ecdb60d38b06fffeba426713aa191cffc2ed",
-            "0000000000000000000000000000000000000000000000000000000000000000",
-            "0d582f13000000000000000000000000be8c10dbf4c6148f9834c56c3331f819\
+            "0x26a7ecdb60d38b06fffeba426713aa191cffc2ed",
+            "0",
+            "0x0d582f13000000000000000000000000be8c10dbf4c6148f9834c56c3331f819\
             1f35555200000000000000000000000000000000000000000000000000000000\
             00000001",
         ];

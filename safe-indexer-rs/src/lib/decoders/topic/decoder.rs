@@ -73,7 +73,7 @@ mod tests {
         };
         let expected = TopicDecodedOutput::ExecutionSuccess {
             safe_tx_hash: String::from(
-                "d2c64a47741878350c85ad6ad202800dc4ce3bb7cbdf9e60399bf71e6d4bd64c",
+                "0xd2c64a47741878350c85ad6ad202800dc4ce3bb7cbdf9e60399bf71e6d4bd64c",
             ),
         };
 
@@ -90,7 +90,7 @@ mod tests {
         };
         let expected = TopicDecodedOutput::ExecutionFailure {
             safe_tx_hash: String::from(
-                "d2c64a47741878350c85ad6ad202800dc4ce3bb7cbdf9e60399bf71e6d4bd64c",
+                "0xd2c64a47741878350c85ad6ad202800dc4ce3bb7cbdf9e60399bf71e6d4bd64c",
             ),
         };
 
