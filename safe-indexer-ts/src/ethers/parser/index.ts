@@ -1,6 +1,6 @@
 import { ethers } from "ethers";
 import { Event, Parser, SafeInteraction } from "../../types";
-import { detailsTopics, etherReceivedTopic, failureTopic, moduleFailureTopic, moduleSuccessTopic, parentTopics, safeInterface, successTopic, transferTopic } from "../constants";
+import { detailsTopics, parentTopics } from "../constants";
 import { ModuleDecoder } from "./module";
 import { MultisigDecoder } from "./multisig";
 import { SettingsDecoder } from "./settings";

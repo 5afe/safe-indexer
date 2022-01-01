@@ -2,6 +2,7 @@ import { SafeInteraction } from "./interactions";
 import { Event } from "./ethereum";
 
 export interface State {
+    earliestIndexedBlock: number; 
     lastIndexedBlock: number;  
 }
 
@@ -22,15 +23,17 @@ export interface Aborted {
 }
 
 export interface Processing {
-    type: "processing",
-    fromBlock: number,
-    toBlock: number,
+    type: "processing"
+    fromBlock: number
+    toBlock: number
     latestBlock: number
+    earliestBlock: number
 }
 
 export interface UpToDate {
     type: "up_to_date"
     latestBlock: number
+    earliestBlock: number
 }
 
 export type IndexerStatus = Processing | UpToDate | Aborted

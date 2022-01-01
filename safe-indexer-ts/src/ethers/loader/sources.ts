@@ -17,7 +17,7 @@ abstract class BaseEventSource implements EventSource {
         const filter = this.buildFilter(fromBlock, toBlock, address)
     
         return this.provider.getLogs(filter).then((e) => {
-            console.debug(this.name, "source loaded", e.length, "events")
+            //console.debug(this.name, "source loaded", e.length, "events")
             return e
         })
     }
